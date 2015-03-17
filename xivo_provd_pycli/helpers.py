@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011-2014 Avencall
+# Copyright (C) 2011-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 # importing <module> as _<module> so that import are not autocompleted in the CLI
 import operator as _operator
 import sys as _sys
-from provd.persist.common import ID_KEY as _ID_KEY
 
 
 def _init_module(configs, devices, plugins):
@@ -54,11 +53,11 @@ def system_info():
 def detailed_system_info():
     """Print various system information."""
     print 'Nb of devices: %s' % _devices.count()
-    for device in _devices.find(fields=[_ID_KEY]):
-        print '    %s' % device[_ID_KEY]
+    for device in _devices.find(fields=[u'id']):
+        print '    %s' % device[u'id']
     print 'Nb of configs: %s' % _configs.count()
-    for config in _configs.find(fields=[_ID_KEY]):
-        print '    %s' % config[_ID_KEY]
+    for config in _configs.find(fields=[u'id']):
+        print '    %s' % config[u'id']
     print 'Nb of installed plugins: %s' % _plugins.count_installed()
     for plugin in _plugins.installed():
         print '    %s' % plugin
@@ -143,8 +142,8 @@ def mass_synchronize():
 def remove_transient_configs():
     """Remove any unused transient config. Mostly useful for debugging purpose."""
     n = 0
-    for config in map(_operator.itemgetter('id'), _configs.find({u'transient': True}, fields=['id'])):
-        if not _devices.find({u'config': config}, fields=['id']):
+    for config in map(_operator.itemgetter(u'id'), _configs.find({u'transient': True}, fields=[u'id'])):
+        if not _devices.find({u'config': config}, fields=[u'id']):
             print 'Removing config %s' % config
             _configs.remove(config)
             n += 1

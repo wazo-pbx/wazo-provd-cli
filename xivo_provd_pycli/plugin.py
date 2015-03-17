@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011-2014 Avencall
+# Copyright (C) 2011-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 
 # importing <module> as _<module> so that import are not autocompleted in the CLI
 from pprint import pprint as _pprint
-from provd.persist.common import ID_KEY as _ID_KEY
 
 # list of (test config info, test config factory) tuples
 _TEST_CONFIGS = []
@@ -86,8 +85,8 @@ def remove_test_configs():
     set to True.
     
     """
-    for config in _configs.find({u'X_test': True}, fields=[_ID_KEY]):
-        config_id = config[_ID_KEY]
+    for config in _configs.find({u'X_test': True}, fields=[u'id']):
+        config_id = config[u'id']
         print 'Removing config %s' % config_id
         _configs.remove(config_id)
 
@@ -97,8 +96,8 @@ def remove_test_devices():
     set to True.
     
     """
-    for device in _devices.find({u'X_test': True}, fields=[_ID_KEY]):
-        device_id = device[_ID_KEY]
+    for device in _devices.find({u'X_test': True}, fields=[u'id']):
+        device_id = device[u'id']
         print 'Removing device %s' % device_id
         _devices.remove(device_id)
 

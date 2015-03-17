@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011-2014 Avencall
+# Copyright (C) 2011-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import sys
 import types
 import urllib2
 from pprint import pprint
-from provd.rest.pycli import pyclient
+from xivo_provd_pycli import pyclient
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 8666
@@ -357,13 +357,13 @@ def dirr(obj):
 
 
 # import and initialize the helpers module
-import provd.rest.pycli.helpers as helpers
+import xivo_provd_pycli.helpers as helpers
 helpers._init_module(configs, devices, plugins)
 
 
 # import and initialize the tests module
 if opts.tests:
-    import provd.rest.pycli.plugin as plugin_tests
+    import xivo_provd_pycli.plugin as plugin_tests
     plugin_tests._init_module(configs, devices, plugins)
 
 

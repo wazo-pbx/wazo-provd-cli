@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2013-2015 Avencall
+# Copyright (C) 2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,21 +16,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from xivo_provd_pycli.pycli import helpers
+
+from xivo_provd_pycli.mac import norm_mac
 
 
-class TestHelpers(unittest.TestCase):
+class TestNormMac(unittest.TestCase):
 
-    def test_are_plugins_installed_missing(self):
-        installed_plugins = set()
+    def test_norm_mac(self):
+        expected = '00:11:22:aa:bb:cc'
+        macs = [
+            '001122AABBCC',
+            '00-11-22-aa-Bb-cc',
+        ]
 
-        res = helpers._are_plugins_installed(['foo'], installed_plugins)
-
-        self.assertFalse(res)
-
-    def test_are_plugins_installed(self):
-        installed_plugins = set(['foo'])
-
-        res = helpers._are_plugins_installed(['foo'], installed_plugins)
-
-        self.assertTrue(res)
+        for mac in macs:
+            self.assertEqual(norm_mac(mac), expected)

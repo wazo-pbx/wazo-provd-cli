@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011-2014 Avencall
+# Copyright (C) 2011-2015 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,12 +19,10 @@ from copy import deepcopy
 from time import sleep
 from sys import stdout
 from itertools import chain
-from provd.devices.device import copy as copy_device
-from provd.operation import parse_oip, OIP_SUCCESS, OIP_FAIL, OIP_WAITING, \
+from xivo_provd_client import new_provisioning_client
+from xivo_provd_client.operation import parse_oip, OIP_SUCCESS, OIP_FAIL, OIP_WAITING, \
     OIP_PROGRESS, OperationInProgress
-from provd.persist.common import ID_KEY
-from provd.rest.client.client import new_provisioning_client
-from provd.util import norm_mac
+from xivo_provd_pycli.mac import norm_mac
 
 
 class _Options(object):
@@ -200,7 +198,7 @@ def _get_id(id_or_dict):
     if isinstance(id_or_dict, basestring):
         return id_or_dict
     else:
-        return id_or_dict[ID_KEY]
+        return id_or_dict[u'id']
 
 
 class ProvisioningClient(object):
@@ -323,7 +321,7 @@ class Configs(object):
 
     def remove_all(self):
         for config in self._cfg_mgr.find({}):
-            config_id = config[ID_KEY]
+            config_id = config[u'id']
             print 'Removing config %s' % config_id
             self._cfg_mgr.remove(config_id)
 
@@ -334,7 +332,7 @@ class Configs(object):
         old_id = _get_id(id_or_config)
         config = self._cfg_mgr.get(old_id)
         if new_id is not None:
-            config[ID_KEY] = new_id
+            config[u'id'] = new_id
         return self._cfg_mgr.add(config)
 
     def find(self, *args, **kwargs):
@@ -344,7 +342,7 @@ class Configs(object):
         return Config(name, self._cfg_mgr)
 
     def count(self):
-        return len(self._cfg_mgr.find(fields=[ID_KEY]))
+        return len(self._cfg_mgr.find(fields=[u'id']))
 
 
 class Config(object):
@@ -418,7 +416,7 @@ class Devices(object):
 
     def remove_all(self):
         for device in self._dev_mgr.find({}):
-            device_id = device[ID_KEY]
+            device_id = device[u'id']
             print 'Removing device %s' % device_id
             self._dev_mgr.remove(device_id)
 
@@ -441,14 +439,14 @@ class Devices(object):
         return Device(name, self._dev_mgr)
 
     def count(self):
-        return len(self._dev_mgr.find(fields=[ID_KEY]))
+        return len(self._dev_mgr.find(fields=[u'id']))
 
     def using_plugin(self, plugin_id):
         return self._new_device_group_from_selector({u'plugin': plugin_id})
 
     def _new_device_group_from_selector(self, selector):
-        devices = self._dev_mgr.find(selector, fields=[ID_KEY])
-        device_ids = [device[ID_KEY] for device in devices]
+        devices = self._dev_mgr.find(selector, fields=[u'id'])
+        device_ids = [device[u'id'] for device in devices]
         return DeviceGroup(self._dev_mgr, device_ids)
 
     def using_mac(self, mac):
@@ -491,7 +489,7 @@ class Device(object):
 
     def set(self, values):
         old_device = self._dev_mgr.get(self._id)
-        new_device = copy_device(old_device)
+        new_device = deepcopy(old_device)
         for k, v in values.iteritems():
             new_device[k] = v
         if new_device != old_device:
@@ -500,7 +498,7 @@ class Device(object):
 
     def unset(self, *values):
         old_device = self._dev_mgr.get(self._id)
-        new_device = copy_device(old_device)
+        new_device = deepcopy(old_device)
         for k in values:
             if k in old_device:
                 del new_device[k]
