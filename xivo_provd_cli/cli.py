@@ -368,7 +368,7 @@ if opts.tests:
 
 
 # change interpreter prompt
-sys.ps1 = 'provpy> '
+sys.ps1 = 'xivo-provd-cli> '
 sys.ps2 = '....... '
 
 
