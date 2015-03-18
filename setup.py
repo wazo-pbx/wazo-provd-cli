@@ -31,5 +31,6 @@ setup(
     url='https://github.com/xivo-pbx/xivo-provd-cli',
 
     packages=find_packages(),
-    scripts=['bin/provd_pycli'],
+    scripts=['bin/provd_pycli',
+             'bin/xivo-provd-cli'],
 )
