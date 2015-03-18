@@ -17,7 +17,7 @@
 
 import unittest
 
-from xivo_provd_pycli import helpers
+from xivo_provd_cli import helpers
 
 
 class TestHelpers(unittest.TestCase):

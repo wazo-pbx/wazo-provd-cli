@@ -17,7 +17,7 @@
 
 import unittest
 
-from xivo_provd_pycli.mac import norm_mac
+from xivo_provd_cli.mac import norm_mac
 
 
 class TestNormMac(unittest.TestCase):

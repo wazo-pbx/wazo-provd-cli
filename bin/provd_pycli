@@ -4,4 +4,4 @@ if [ -z "$PYTHON" ]; then
     PYTHON=python
 fi
 
-"$PYTHON" -m xivo_provd_pycli.pycli "$@"
+"$PYTHON" -m xivo_provd_cli.cli "$@"

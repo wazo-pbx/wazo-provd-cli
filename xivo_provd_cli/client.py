@@ -22,7 +22,7 @@ from itertools import chain
 from xivo_provd_client import new_provisioning_client
 from xivo_provd_client.operation import parse_oip, OIP_SUCCESS, OIP_FAIL, OIP_WAITING, \
     OIP_PROGRESS, OperationInProgress
-from xivo_provd_pycli.mac import norm_mac
+from xivo_provd_cli.mac import norm_mac
 
 
 class _Options(object):
@@ -667,6 +667,6 @@ class Plugin(object):
         return Parameters(self._client_plugin.configure_service())
 
 
-def new_pycli_provisioning_client(server_uri, credentials):
+def new_cli_provisioning_client(server_uri, credentials):
     prov_client = new_provisioning_client(server_uri, credentials)
     return ProvisioningClient(prov_client)

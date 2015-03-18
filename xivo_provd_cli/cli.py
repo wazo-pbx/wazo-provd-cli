@@ -29,12 +29,12 @@ import sys
 import types
 import urllib2
 from pprint import pprint
-from xivo_provd_pycli import pyclient
+from xivo_provd_cli import client as cli_client
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 8666
 DEFAULT_USER = 'admin'
-DEFAULT_HISTFILE = os.path.expanduser('~/.provd_pycli_history')
+DEFAULT_HISTFILE = os.path.expanduser('~/.xivo_provd_cli')
 DEFAULT_HISTFILESIZE = 500
 
 
@@ -64,7 +64,7 @@ else:
 credentials = (opts.user, password)
 
 # # create client object
-client = pyclient.new_pycli_provisioning_client(server_uri, credentials)
+client = cli_client.new_cli_provisioning_client(server_uri, credentials)
 configs = client.configs()
 devices = client.devices()
 plugins = client.plugins()
@@ -107,7 +107,7 @@ RAW_HELP_MAP = {
 \x1b[1mNotes\x1b[0m
     This CLI is a plain python interpreter.
 """,
-    pyclient.Configs: """\
+    cli_client.Configs: """\
 \x1b[1mDescription\x1b[0m
     Manage the configs.
 
@@ -145,7 +145,7 @@ RAW_HELP_MAP = {
 
         configs.remove('foo')
 """,
-    pyclient.Config: """\
+    cli_client.Config: """\
 \x1b[1mDescription\x1b[0m
     Manage a particular config.
 
@@ -173,7 +173,7 @@ RAW_HELP_MAP = {
 
         configs['foo'].get_raw()
 """,
-    pyclient.Devices: """\
+    cli_client.Devices: """\
 \x1b[1mDescription\x1b[0m
     Manage the devices.
 
@@ -211,7 +211,7 @@ RAW_HELP_MAP = {
 
         devices.update({'id': 'foo', 'mac': '00:11:22:33:44:55'})
 """,
-    pyclient.Device: """\
+    cli_client.Device: """\
 \x1b[1mDescription\x1b[0m
     Manage a particular device.
 
@@ -240,7 +240,7 @@ RAW_HELP_MAP = {
 
         devices['foo'].get()
 """,
-    pyclient.Plugins: """\
+    cli_client.Plugins: """\
 \x1b[1mDescription\x1b[0m
     Manage the plugin subsystem.
 
@@ -277,7 +277,7 @@ RAW_HELP_MAP = {
 
         plugins.parameters()
 """,
-    pyclient.Plugin: """\
+    cli_client.Plugin: """\
 \x1b[1mDescription\x1b[0m
     Manage a particular plugin.
 
@@ -294,7 +294,7 @@ RAW_HELP_MAP = {
 
         plugins['xivo-aastra-2.6.0.2010'].parameters()
 """,
-    pyclient.Parameters: """\
+    cli_client.Parameters: """\
 \x1b[1mDescription\x1b[0m
     Manage parameters of a certain underlying object.
 
@@ -357,13 +357,13 @@ def dirr(obj):
 
 
 # import and initialize the helpers module
-import xivo_provd_pycli.helpers as helpers
+import xivo_provd_cli.helpers as helpers
 helpers._init_module(configs, devices, plugins)
 
 
 # import and initialize the tests module
 if opts.tests:
-    import xivo_provd_pycli.plugin as plugin_tests
+    import xivo_provd_cli.plugin as plugin_tests
     plugin_tests._init_module(configs, devices, plugins)
 
 
@@ -394,7 +394,7 @@ cli_globals = {
     '__builtins__': __builtin__,
     'dirr': dirr,
     'helpers': helpers,
-    'options': pyclient.OPTIONS,
+    'options': cli_client.OPTIONS,
     'pprint': pprint
 }
 

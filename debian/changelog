@@ -1,4 +1,4 @@
-xivo-provd-pycli (0.1) xivo-dev; urgency=low
+xivo-provd-cli (0.1) xivo-dev; urgency=low
 
   * Initial release.
 

@@ -20,7 +20,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 setup(
-    name='xivo_provd_pycli',
+    name='xivo_provd_cli',
     version='0.1',
 
     description='a CLI to interact with xivo-provd',
@@ -28,7 +28,7 @@ setup(
     author='Avencall',
     author_email='dev@avencall.com',
 
-    url='https://github.com/xivo-pbx/xivo-provd-pycli',
+    url='https://github.com/xivo-pbx/xivo-provd-cli',
 
     packages=find_packages(),
     scripts=['bin/provd_pycli'],
