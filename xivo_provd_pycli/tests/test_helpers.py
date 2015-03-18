@@ -16,7 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-from xivo_provd_pycli.pycli import helpers
+
+from xivo_provd_pycli import helpers
 
 
 class TestHelpers(unittest.TestCase):

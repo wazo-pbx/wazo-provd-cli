@@ -16,7 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 import unittest
-import xivo_provd_pycli.pyclient as pyclient
+
+from xivo_provd_pycli import pyclient
 
 
 class TestExpandDottedDict(unittest.TestCase):
