@@ -12,6 +12,7 @@ Package: xivo-provd-cli
 Architecture: all
 Section: python
 Depends: ${python:Depends}, ${misc:Depends}, xivo-provd-client
+Conflicts: xivo-provd (<< 15.05)
 Description: CLI program to interact with xivo-provd
  XiVO is a system based on a powerful IPBX, to bring an easy to
  install solution for telephony and related services.
