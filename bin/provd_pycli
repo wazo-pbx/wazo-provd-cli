@@ -1,8 +1,0 @@
-#!/bin/sh
-
-if [ -z "$PYTHON" ]; then
-    PYTHON=python
-fi
-
-echo 'Warning: provd_pycli is deprecated, please use xivo-provd-cli instead.' >&2
-"$PYTHON" -m xivo_provd_cli.cli "$@"
