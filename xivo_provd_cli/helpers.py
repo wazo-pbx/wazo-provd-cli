@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011-2015 Avencall
+# Copyright (C) 2011-2016 Avencall
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -104,7 +104,9 @@ def mass_update_devices_plugin(old_plugin, new_plugin, synchronize=False):
 
     installed_plugins = set(_plugins.installed())
     if not _are_plugins_installed([old_plugin, new_plugin], installed_plugins):
-        return
+        answer = raw_input('Do you want to proceed anyway? [Y/n] ')
+        if answer and answer not in ('Y', 'y'):
+            return
 
     for device in _devices.find({u'plugin': old_plugin}):
         device[u'plugin'] = new_plugin
@@ -117,10 +119,11 @@ def mass_update_devices_plugin(old_plugin, new_plugin, synchronize=False):
 
 
 def _are_plugins_installed(plugins, installed_plugins):
+    result = True
     for plugin in plugins:
         if not _is_plugin_installed(plugin, installed_plugins):
-            return False
-    return True
+            result = False
+    return result
 
 
 def _is_plugin_installed(plugin, installed_plugins):
