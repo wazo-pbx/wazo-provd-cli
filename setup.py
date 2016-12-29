@@ -25,10 +25,10 @@ setup(
 
     description='a CLI to interact with xivo-provd',
 
-    author='Avencall',
-    author_email='dev@avencall.com',
+    author='Wazo Authors',
+    author_email='dev.wazo@gmail.com',
 
-    url='https://github.com/wazo-pbx/xivo-provd-cli',
+    url='http://wazo.community',
 
     packages=find_packages(),
     scripts=['bin/xivo-provd-cli'],
