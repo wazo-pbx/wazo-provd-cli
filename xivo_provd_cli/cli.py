@@ -17,20 +17,16 @@ import sys
 import types
 from pprint import pprint
 from xivo_provd_cli import client as cli_client
+from wazo_provd_client.exceptions import ProvdError
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 8666
-DEFAULT_USER = 'admin'
 DEFAULT_HISTFILE = os.path.expanduser('~/.xivo_provd_cli')
 DEFAULT_HISTFILESIZE = 500
 
 
 # parse command line arguments
 parser = optparse.OptionParser(usage='usage: %prog [options] [hostname]')
-parser.add_option('-u', '--user', default=DEFAULT_USER,
-                  help='user name for server authentication')
-parser.add_option('-p', '--password',
-                  help='user name for server authentication')
 parser.add_option('--port', default=DEFAULT_PORT,
                   help='port number of the REST API')
 parser.add_option('-c', '--command',
@@ -43,15 +39,18 @@ if not args:
     host = DEFAULT_HOST
 else:
     host = args[0]
-server_uri = 'http://%s:%s/provd' % (host, opts.port)
-if opts.password is None:
-    password = getpass.getpass('%s@%s\'s password: ' % (opts.user, host))
-else:
-    password = opts.password
-credentials = (opts.user, password)
+
+provd_args = {
+    'host': host,
+    'port': opts.port,
+    'https': False,
+    'verify_certificate': False,
+    'prefix': '/provd',
+    'token': opts.token,
+}
 
 # # create client object
-client = cli_client.new_cli_provisioning_client(server_uri, credentials)
+client = cli_client.new_cli_provisioning_client(provd_args)
 configs = client.configs()
 devices = client.devices()
 plugins = client.plugins()
