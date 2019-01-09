@@ -7,10 +7,11 @@ from copy import deepcopy
 from time import sleep
 from sys import stdout
 from itertools import chain
-from xivo_provd_client import new_provisioning_client
-from xivo_provd_client.operation import parse_oip, OIP_SUCCESS, OIP_FAIL, OIP_WAITING, \
+from wazo_provd_client.operation import parse_operation, OIP_SUCCESS, OIP_FAIL, OIP_WAITING, \
     OIP_PROGRESS, OperationInProgress
 from xivo_provd_cli.mac import norm_mac
+from wazo_provd_client import Client as ProvdClient
+from wazo_provd_client.exceptions import ProvdError
 
 
 class _Options(object):
@@ -194,16 +195,16 @@ class ProvisioningClient(object):
         self._prov_client = prov_client
 
     def configs(self):
-        return Configs(self._prov_client.config_manager())
+        return Configs(self._prov_client.configs)
 
     def devices(self):
-        return Devices(self._prov_client.device_manager())
+        return Devices(self._prov_client.devices)
 
     def plugins(self):
-        return Plugins(self._prov_client.plugin_manager())
+        return Plugins(self._prov_client.plugins)
 
     def parameters(self):
-        return Parameters(self._prov_client.configure_service())
+        return Parameters(self._prov_client.params)
 
     def test_connectivity(self):
         self._prov_client.test_connectivity()
@@ -289,7 +290,7 @@ class Configs(object):
 
     def add(self, dotted_config):
         config = _expand_dotted_dict(dotted_config)
-        return self._cfg_mgr.add(config)
+        return self._cfg_mgr.create(config)
 
     def get(self, id_or_config):
         id = _get_id(id_or_config)
@@ -305,32 +306,32 @@ class Configs(object):
 
     def remove(self, id_or_config):
         id = _get_id(id_or_config)
-        self._cfg_mgr.remove(id)
+        self._cfg_mgr.delete(id)
 
     def remove_all(self):
-        for config in self._cfg_mgr.find({}):
+        for config in self._cfg_mgr.list({})['configs']:
             config_id = config[u'id']
             print 'Removing config %s' % config_id
-            self._cfg_mgr.remove(config_id)
+            self._cfg_mgr.delete(config_id)
 
     def autocreate(self):
-        return self._cfg_mgr.autocreate()
+        return self._cfg_mgr.autocreate()['id']
 
     def clone(self, id_or_config, new_id=None):
         old_id = _get_id(id_or_config)
         config = self._cfg_mgr.get(old_id)
         if new_id is not None:
             config[u'id'] = new_id
-        return self._cfg_mgr.add(config)
+        return self._cfg_mgr.create(config)
 
     def find(self, *args, **kwargs):
-        return self._cfg_mgr.find(*args, **kwargs)
+        return self._cfg_mgr.list(*args, **kwargs)['configs']
 
     def __getitem__(self, name):
         return Config(name, self._cfg_mgr)
 
     def count(self):
-        return len(self._cfg_mgr.find(fields=[u'id']))
+        return len(self._cfg_mgr.list(fields=[u'id'])['configs'])
 
 
 class Config(object):
@@ -387,7 +388,7 @@ class Devices(object):
         self._dev_mgr = dev_mgr
 
     def add(self, device):
-        return self._dev_mgr.add(device)
+        return self._dev_mgr.create(device)
 
     def get(self, id_or_device):
         # return a device as a dictionary
@@ -400,13 +401,13 @@ class Devices(object):
 
     def remove(self, id_or_device):
         id = _get_id(id_or_device)
-        self._dev_mgr.remove(id)
+        self._dev_mgr.delete(id)
 
     def remove_all(self):
-        for device in self._dev_mgr.find({}):
+        for device in self._dev_mgr.list({}):
             device_id = device[u'id']
             print 'Removing device %s' % device_id
-            self._dev_mgr.remove(device_id)
+            self._dev_mgr.delete(device_id)
 
     def reconfigure(self, id_or_device):
         id = _get_id(id_or_device)
@@ -421,19 +422,19 @@ class Devices(object):
             client_oip.delete()
 
     def find(self, *args, **kwargs):
-        return self._dev_mgr.find(*args, **kwargs)
+        return self._dev_mgr.list(*args, **kwargs)['devices']
 
     def __getitem__(self, name):
         return Device(name, self._dev_mgr)
 
     def count(self):
-        return len(self._dev_mgr.find(fields=[u'id']))
+        return len(self._dev_mgr.list(fields=[u'id']))
 
     def using_plugin(self, plugin_id):
         return self._new_device_group_from_selector({u'plugin': plugin_id})
 
     def _new_device_group_from_selector(self, selector):
-        devices = self._dev_mgr.find(selector, fields=[u'id'])
+        devices = self._dev_mgr.list(selector, fields=[u'id'])
         device_ids = [device[u'id'] for device in devices]
         return DeviceGroup(self._dev_mgr, device_ids)
 
@@ -511,40 +512,35 @@ class Plugins(object):
         self._pg_mgr = pg_mgr
 
     def install(self, id):
-        install_srv = self._pg_mgr.install_service()
-        client_oip = install_srv.install(id)
+        client_oip = self._pg_mgr.install(id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
             client_oip.delete()
 
     def upgrade(self, id):
-        install_srv = self._pg_mgr.install_service()
-        client_oip = install_srv.upgrade(id)
+        client_oip = self._pg_mgr.upgrade(id)
         _display_operation_in_progress(client_oip)
         client_oip.delete()
 
     def uninstall(self, id):
-        install_srv = self._pg_mgr.install_service()
-        install_srv.uninstall(id)
+        self._pg_mgr.uninstall(id)
 
     def uninstall_all(self):
-        install_srv = self._pg_mgr.install_service()
-        pg_ids = sorted(install_srv.installed())
+        pg_ids = sorted(self._pg_mgr.list_installed()['plugins'])
         for pg_id in pg_ids:
             print 'Uninstalling plugin %s' % pg_id
-            install_srv.uninstall(pg_id)
+            self._pg_mgr.uninstall(pg_id)
 
     def reload(self, id):
         """Reload the plugin with the given ID. This is mostly useful for
         debugging purpose.
-        
+
         """
         self._pg_mgr.reload(id)
 
     def update(self):
-        install_srv = self._pg_mgr.install_service()
-        client_oip = install_srv.update()
+        client_oip = self._pg_mgr.update()
         if OPTIONS.op_async:
             return client_oip
         else:
@@ -557,20 +553,19 @@ class Plugins(object):
                 client_oip.delete()
 
     def installed(self, search=None):
-        install_srv = self._pg_mgr.install_service()
-        return _search_in_pkgs(install_srv.installed(), search)
+        plugins_installed = self._pg_mgr.list_installed()['pkgs']
+        return _search_in_pkgs(plugins_installed, search)
 
     def installable(self, search=None):
-        install_srv = self._pg_mgr.install_service()
-        return _search_in_pkgs(install_srv.installable(), search)
+        plugins_installable = self._pg_mgr.list_installable()['pkgs']
+        return _search_in_pkgs(plugins_installable, search)
 
-    def __getitem__(self, id):
+    def __getitem__(self, plugin_id):
         # return the plugin with id id
-        return Plugin(self._pg_mgr.plugin(id))
+        return Plugin(self._pg_mgr, plugin_id)
 
     def count_installed(self):
-        install_srv = self._pg_mgr.install_service()
-        return len(install_srv.installed())
+        return len(self._pg_mgr.list_installed()['pkgs'])
 
 
 class Parameters(object):
@@ -578,26 +573,26 @@ class Parameters(object):
         self._config_srv = config_srv
 
     def infos(self):
-        return self._config_srv.infos()
+        return self._config_srv.list()['params']
 
     def get(self, key):
         return self._config_srv.get(key)
 
     def set(self, key, value):
-        self._config_srv.set(key, value)
+        self._config_srv.update(key, value)
 
     def unset(self, key):
         # equivalent to set(key, None)
-        self._config_srv.set(key, None)
+        self._config_srv.update(key, None)
 
 
 class Plugin(object):
-    def __init__(self, client_plugin):
+    def __init__(self, client_plugin, plugin_id):
         self._client_plugin = client_plugin
+        self._plugin_id = plugin_id
 
     def install(self, id):
-        install_srv = self._client_plugin.install_service()
-        client_oip = install_srv.install(id)
+        client_oip = self._client_plugin.install_package(self._plugin_id, id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
@@ -605,11 +600,10 @@ class Plugin(object):
 
     def install_all(self):
         """Install all the packages available from this plugin."""
-        install_srv = self._client_plugin.install_service()
-        pkg_ids = sorted(install_srv.installable())
+        pkg_ids = sorted(self._client_plugin.get_packages_installable(self._plugin_id)['pkgs'])
         for pkg_id in pkg_ids:
             print 'Installing package %s' % pkg_id
-            client_oip = install_srv.install(pkg_id)
+            client_oip = self._client_plugin.install_package(self._plugin_id, pkg_id)
             try:
                 _display_operation_in_progress(client_oip)
             finally:
@@ -617,23 +611,20 @@ class Plugin(object):
             print
 
     def upgrade(self, id):
-        install_srv = self._client_plugin.install_service()
-        client_oip = install_srv.upgrade(id)
+        client_oip = self._client_plugin.upgrade_package(self._plugin_id, id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
             client_oip.delete()
 
     def uninstall(self, id):
-        install_srv = self._client_plugin.install_service()
-        install_srv.uninstall(id)
+        self._client_plugin.uninstall(id)
 
     def uninstall_all(self):
-        install_srv = self._client_plugin.install_service()
-        pkg_ids = sorted(install_srv.installed())
+        pkg_ids = sorted(self._client_plugin.get_packages_installed(self._plugin_id)['pkgs'])
         for pkg_id in pkg_ids:
             print 'Uninstalling package %s' % pkg_id
-            install_srv.uninstall(pkg_id)
+            self._client_plugin.uninstall_package(self._plugin_id, pkg_id)
 
     def update(self):
         install_srv = self._client_plugin.install_service()
@@ -644,17 +635,14 @@ class Plugin(object):
             client_oip.delete()
 
     def installed(self, search=None):
-        install_srv = self._client_plugin.install_service()
-        return _search_in_pkgs(install_srv.installed(), search)
+        pkgs = self._client_plugin.get_packages_installed(self._plugin_id)['pkgs']
+        return _search_in_pkgs(pkgs, search)
 
     def installable(self, search=None):
-        install_srv = self._client_plugin.install_service()
-        return _search_in_pkgs(install_srv.installable(), search)
-
-    def parameters(self):
-        return Parameters(self._client_plugin.configure_service())
+        pkgs = self._client_plugin.get_packages_installable(self._plugin_id)['pkgs']
+        return _search_in_pkgs(pkgs, search)
 
 
-def new_cli_provisioning_client(server_uri, credentials):
-    prov_client = new_provisioning_client(server_uri, credentials)
+def new_cli_provisioning_client(provd_args):
+    prov_client = ProvdClient(**provd_args)
     return ProvisioningClient(prov_client)
