@@ -101,7 +101,7 @@ def _write_oip_info(top_oip, init_pos_spec, cur_pos_spec, fobj):
                 continue
             else:
                 # we need to rewrite the oip
-                oip = OperationInProgress(oip.label, OIP_PROGRESS)
+                oip = BaseOperation(oip.label, OIP_PROGRESS)
         line = _format_oip_line(oip, tree_pos)
         fobj.write('\r' + line)
         if idx != cur_idx:
@@ -126,10 +126,10 @@ def _find_active_oip(top_oip):
 def _display_operation_in_progress(client_oip):
     init_pos_spec = ((), False)
     while True:
-        top_oip = parse_oip(client_oip.status())
-        cur_pos_spec = _find_active_oip(top_oip)
-        _write_oip_info(top_oip, init_pos_spec, cur_pos_spec, stdout)
-        if top_oip.state in [OIP_SUCCESS, OIP_FAIL]:
+        client_oip.update()
+        cur_pos_spec = _find_active_oip(client_oip)
+        _write_oip_info(client_oip, init_pos_spec, cur_pos_spec, stdout)
+        if client_oip.state in [OIP_SUCCESS, OIP_FAIL]:
             # operation completed
             assert cur_pos_spec == ((), True)
             break
@@ -141,12 +141,11 @@ def _display_operation_in_progress(client_oip):
 
 def _nodisplay_operation_in_progress(client_oip):
     while True:
-        top_oip = parse_oip(client_oip.status())
-        if top_oip.state in [OIP_SUCCESS, OIP_FAIL]:
+        if client_oip.state in [OIP_SUCCESS, OIP_FAIL]:
             break
         else:
             sleep(OPTIONS.oip_update_interval)
-    print _format_oip_line(top_oip, ())
+    print _format_oip_line(client_oip, ())
 
 
 def _search_in_pkgs_gen(pkgs, search):
