@@ -15,7 +15,6 @@ import re
 import readline
 import sys
 import types
-import urllib2
 from pprint import pprint
 from xivo_provd_cli import client as cli_client
 
@@ -60,7 +59,7 @@ parameters = client.parameters()
 
 # # test connectivity
 try:
-    client.test_connectivity()
+    plugins.installable()
 except Exception as e:
     print >> sys.stderr, 'Error while connecting to xivo-provd:', e
     sys.exit(1)

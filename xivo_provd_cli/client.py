@@ -206,7 +206,10 @@ class ProvisioningClient(object):
         return Parameters(self._prov_client.params)
 
     def test_connectivity(self):
-        self._prov_client.test_connectivity()
+        try:
+            self.plugins.list_installable()
+        except Exception as e:
+            print >> sys.stderr, 'Error while connecting to xivo-provd:', e
 
 
 def _rec_update_dict(base_dict, overlay_dict):
