@@ -8,7 +8,6 @@
 
 import __builtin__
 import code
-import getpass
 import optparse
 import os
 import re
@@ -17,7 +16,6 @@ import sys
 import types
 from pprint import pprint
 from xivo_provd_cli import client as cli_client
-from wazo_provd_client.exceptions import ProvdError
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 8666

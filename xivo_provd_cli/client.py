@@ -7,11 +7,10 @@ from copy import deepcopy
 from time import sleep
 from sys import stdout
 from itertools import chain
-from wazo_provd_client.operation import parse_operation, OIP_SUCCESS, OIP_FAIL, OIP_WAITING, \
-    OIP_PROGRESS, OperationInProgress
+from wazo_provd_client.operation import OIP_SUCCESS, OIP_FAIL, OIP_WAITING, \
+    OIP_PROGRESS, BaseOperation
 from xivo_provd_cli.mac import norm_mac
 from wazo_provd_client import Client as ProvdClient
-from wazo_provd_client.exceptions import ProvdError
 
 
 class _Options(object):
