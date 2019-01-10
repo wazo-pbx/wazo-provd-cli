@@ -257,10 +257,6 @@ RAW_HELP_MAP = {
     Get the plugin object for plugin 'xivo-aastra-2.6.0.2010'
 
         plugins['xivo-aastra-2.6.0.2010']
-
-    Manage the plugin subsystem parameters
-
-        plugins.parameters()
 """,
     cli_client.Plugin: """\
 \x1b[1mDescription\x1b[0m
@@ -274,14 +270,10 @@ RAW_HELP_MAP = {
     Install all available plugin-packages
 
         plugins['xivo-aastra-2.6.0.2010'].install_all()
-
-    Manage this plugin subsystem parameters
-
-        plugins['xivo-aastra-2.6.0.2010'].parameters()
 """,
     cli_client.Parameters: """\
 \x1b[1mDescription\x1b[0m
-    Manage parameters of a certain underlying object.
+    Manage parameters of the provisioning server.
 
 \x1b[1mExamples\x1b[0m
     Get the parameters description
