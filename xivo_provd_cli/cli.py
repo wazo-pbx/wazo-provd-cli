@@ -14,6 +14,7 @@ import re
 import readline
 import sys
 import types
+import xivo_provd_cli.helpers as helpers
 from pprint import pprint
 from xivo_provd_cli import client as cli_client
 
@@ -340,8 +341,7 @@ def dirr(obj):
     return list(name for name in dir(obj) if not name.startswith('_'))
 
 
-# import and initialize the helpers module
-import xivo_provd_cli.helpers as helpers
+# initialize the helpers module
 helpers._init_module(configs, devices, plugins)
 
 
@@ -361,6 +361,7 @@ def my_displayhook(value):
     if value is not None:
         __builtin__._ = value
         pprint(value)
+
 
 sys.displayhook = my_displayhook
 
@@ -391,7 +392,7 @@ class Completer(object):
     # This is largely taken from the rlcompleter module
     def __init__(self, namespace):
         if not isinstance(namespace, dict):
-            raise TypeError, 'namespace must be a dictionary'
+            raise TypeError('namespace must be a dictionary')
 
         self.namespace = namespace
 
@@ -443,12 +444,14 @@ class Completer(object):
                 matches.append(word)
         return matches
 
+
 def get_class_members(klass):
     ret = dirr(klass)
     if hasattr(klass, '__bases__'):
         for base in klass.__bases__:
             ret = ret + get_class_members(base)
     return ret
+
 
 completer = Completer(cli_globals)
 readline.set_completer(completer.complete)

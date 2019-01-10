@@ -21,6 +21,7 @@ class _Options(object):
         self.op_async = False
         self.oip_update_interval = 1.0
 
+
 OPTIONS = _Options()
 
 
@@ -30,6 +31,7 @@ _FMT_STATE_MAP = {
     OIP_FAIL: 'failed.',
     OIP_SUCCESS: 'done.'
 }
+
 
 def _format_oip(oip):
     # format the oip
@@ -166,6 +168,7 @@ def _search_in_pkgs_gen(pkgs, search):
             return search in value
     else:
         search = search.lower()
+
         def search_pred(value):
             return search in value.lower()
     for pkg_id, pkg in pkgs.iteritems():
@@ -269,16 +272,16 @@ def _do_expand_dotted_dict(dotted_dict, result_dict):
 
 def _expand_dotted_dict(dotted_dict):
     """Expand a "dotted dict" to a regular dict.
-    
+
     >>> _expand_dotted_dict({'a.b': 'v'})
     {'a': {'b': 'v'}}
     >>> _expand_dotted_dict({'a.b': {'c': 'v', 'd': 'v'}})
     {'a': {'b': {'c': 'v', 'd': 'v'}}}
-    
+
     Some dotted dicts have undefined expansion, for example:
       {'a.b': 'v1', 'a': {'b': 'v2'}}
       {'a': {'b': {'c': 'v1'}}, 'a.b': {'c': 'v1'}}
-    
+
     """
     result = {}
     _do_expand_dotted_dict(dotted_dict, result)
