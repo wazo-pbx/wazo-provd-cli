@@ -627,14 +627,6 @@ class Plugin(object):
             print 'Uninstalling package %s' % pkg_id
             self._client_plugin.uninstall_package(self._plugin_id, pkg_id)
 
-    def update(self):
-        install_srv = self._client_plugin.install_service()
-        client_oip = install_srv.update()
-        try:
-            _display_operation_in_progress(client_oip)
-        finally:
-            client_oip.delete()
-
     def installed(self, search=None):
         pkgs = self._client_plugin.get_packages_installed(self._plugin_id)['pkgs']
         return _search_in_pkgs(pkgs, search)
