@@ -16,13 +16,30 @@ import sys
 import types
 import xivo_provd_cli.helpers as helpers
 from pprint import pprint
+from xivo.token_renewer import TokenRenewer
+from xivo_auth_client import Client as AuthClient
 from xivo_provd_cli import client as cli_client
+from xivo.config_helper import parse_config_file
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 8666
 DEFAULT_HISTFILE = os.path.expanduser('~/.xivo_provd_cli')
 DEFAULT_HISTFILESIZE = 500
 
+_CONFIG = {
+    'auth': {
+        'host': 'localhost',
+        'key_file': '/var/lib/wazo-auth-keys/xivo-provd-cli-key.yml',
+        'verify_certificate': '/usr/share/xivo-certs/server.crt',
+    },
+    'provd': {
+        'host': DEFAULT_HOST,
+        'port': DEFAULT_PORT,
+        'https': False,
+        'verify_certificate': False,
+        'prefix': '/provd',
+    }
+}
 
 # parse command line arguments
 parser = optparse.OptionParser(usage='usage: %prog [options] [hostname]')
@@ -39,17 +56,19 @@ if not args:
 else:
     host = args[0]
 
-provd_args = {
-    'host': host,
-    'port': opts.port,
-    'https': False,
-    'verify_certificate': False,
-    'prefix': '/provd',
-    'token': opts.token,
-}
+_CONFIG['provd']['host'] = host
+_CONFIG['provd']['port'] = opts.port
 
 # # create client object
-client = cli_client.new_cli_provisioning_client(provd_args)
+client = cli_client.new_cli_provisioning_client(_CONFIG['provd'])
+
+# read key from key file and setup token renewer
+key_file = parse_config_file(_CONFIG['auth'].pop('key_file'))
+auth_client = AuthClient(username=key_file['service_id'], password=key_file['service_key'], **_CONFIG['auth'])
+token_renewer = TokenRenewer(auth_client, expiration=600)
+token_renewer.subscribe_to_token_change(client.prov_client.set_token)
+
+
 configs = client.configs()
 devices = client.devices()
 plugins = client.plugins()
@@ -470,11 +489,13 @@ class CustomInteractiveConsole(code.InteractiveConsole):
     def write(self, data):
         sys.stdout.write(data)
 
-if opts.command:
-    exec opts.command in cli_globals
-else:
-    cli = CustomInteractiveConsole(cli_globals)
-    cli.interact('')
+
+with token_renewer:
+    if opts.command:
+        exec opts.command in cli_globals
+    else:
+        cli = CustomInteractiveConsole(cli_globals)
+        cli.interact('')
 
 # save history file
 readline.set_history_length(DEFAULT_HISTFILESIZE)
