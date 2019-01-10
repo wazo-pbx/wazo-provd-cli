@@ -195,6 +195,10 @@ class ProvisioningClient(object):
     def __init__(self, prov_client):
         self._prov_client = prov_client
 
+    @property
+    def prov_client(self):
+        return self._prov_client
+
     def configs(self):
         return Configs(self._prov_client.configs)
 
