@@ -45,6 +45,11 @@ _CONFIG = {
 parser = optparse.OptionParser(usage='usage: %prog [options] [hostname]')
 parser.add_option('--port', default=DEFAULT_PORT,
                   help='port number of the REST API')
+parser.add_option('--https', default=False,
+                  help='enable or disable HTTPS connection to provd')
+parser.add_option('--verify', default=False,
+                  help='enable or disable verification of the certificate used by provd,'
+                  ' or path of the certificate to use for validation')
 parser.add_option('-c', '--command',
                   help='specify the command to execute')
 parser.add_option('--tests', action='store_true', default=False,
@@ -58,6 +63,8 @@ else:
 
 _CONFIG['provd']['host'] = host
 _CONFIG['provd']['port'] = opts.port
+_CONFIG['provd']['https'] = opts.https
+_CONFIG['provd']['verify_certificate'] = opts.verify
 
 # # create client object
 client = cli_client.new_cli_provisioning_client(_CONFIG['provd'])
