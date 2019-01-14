@@ -42,11 +42,11 @@ _CONFIG = {
 
 # parse command line arguments
 parser = optparse.OptionParser(usage='usage: %prog [options] [hostname]')
-parser.add_option('--port', default=DEFAULT_PORT,
+parser.add_option('--port',
                   help='port number of the REST API')
-parser.add_option('--https', default=False,
+parser.add_option('--https',
                   help='enable or disable HTTPS connection to provd')
-parser.add_option('--verify', default=False,
+parser.add_option('--verify',
                   help='enable or disable verification of the certificate used by provd,'
                   ' or path of the certificate to use for validation')
 parser.add_option('-c', '--command',
@@ -60,10 +60,23 @@ if not args:
 else:
     host = args[0]
 
+
+def _bool(value):
+    if value in ['True', 'true', '1']:
+        return True
+    if value in ['False', 'false', '0']:
+        return False
+    return value
+
+
 _CONFIG['provd']['host'] = host
-_CONFIG['provd']['port'] = opts.port
-_CONFIG['provd']['https'] = opts.https
-_CONFIG['provd']['verify_certificate'] = opts.verify
+
+if opts.port is not None:
+    _CONFIG['provd']['port'] = int(opts.port)
+if opts.https is not None:
+    _CONFIG['provd']['https'] = _bool(opts.https)
+if opts.verify is not None:
+    _CONFIG['provd']['verify_certificate'] = _bool(opts.verify)
 
 # # create client object
 client = cli_client.new_cli_provisioning_client(_CONFIG['provd'])
