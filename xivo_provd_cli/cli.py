@@ -1,51 +1,55 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011-2015 Avencall
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>
+# Copyright 2011-2019 The Wazo Authors  (see the AUTHORS file)
+# SPDX-License-Identifier: GPL-3.0+
 
 """A command-line interpreter that interact with provd servers."""
 
 
 import __builtin__
 import code
-import getpass
 import optparse
 import os
 import re
 import readline
 import sys
 import types
-import urllib2
+import xivo_provd_cli.helpers as helpers
 from pprint import pprint
+from xivo.token_renewer import TokenRenewer
+from xivo_auth_client import Client as AuthClient
 from xivo_provd_cli import client as cli_client
+from xivo.config_helper import parse_config_file
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 8666
-DEFAULT_USER = 'admin'
 DEFAULT_HISTFILE = os.path.expanduser('~/.xivo_provd_cli')
 DEFAULT_HISTFILESIZE = 500
 
+_CONFIG = {
+    'auth': {
+        'host': 'localhost',
+        'key_file': '/var/lib/wazo-auth-keys/xivo-provd-cli-key.yml',
+        'verify_certificate': '/usr/share/xivo-certs/server.crt',
+    },
+    'provd': {
+        'host': DEFAULT_HOST,
+        'port': DEFAULT_PORT,
+        'https': False,
+        'verify_certificate': False,
+        'prefix': '/provd',
+    }
+}
 
 # parse command line arguments
 parser = optparse.OptionParser(usage='usage: %prog [options] [hostname]')
-parser.add_option('-u', '--user', default=DEFAULT_USER,
-                  help='user name for server authentication')
-parser.add_option('-p', '--password',
-                  help='user name for server authentication')
 parser.add_option('--port', default=DEFAULT_PORT,
                   help='port number of the REST API')
+parser.add_option('--https', default=False,
+                  help='enable or disable HTTPS connection to provd')
+parser.add_option('--verify', default=False,
+                  help='enable or disable verification of the certificate used by provd,'
+                  ' or path of the certificate to use for validation')
 parser.add_option('-c', '--command',
                   help='specify the command to execute')
 parser.add_option('--tests', action='store_true', default=False,
@@ -56,15 +60,22 @@ if not args:
     host = DEFAULT_HOST
 else:
     host = args[0]
-server_uri = 'http://%s:%s/provd' % (host, opts.port)
-if opts.password is None:
-    password = getpass.getpass('%s@%s\'s password: ' % (opts.user, host))
-else:
-    password = opts.password
-credentials = (opts.user, password)
+
+_CONFIG['provd']['host'] = host
+_CONFIG['provd']['port'] = opts.port
+_CONFIG['provd']['https'] = opts.https
+_CONFIG['provd']['verify_certificate'] = opts.verify
 
 # # create client object
-client = cli_client.new_cli_provisioning_client(server_uri, credentials)
+client = cli_client.new_cli_provisioning_client(_CONFIG['provd'])
+
+# read key from key file and setup token renewer
+key_file = parse_config_file(_CONFIG['auth'].pop('key_file'))
+auth_client = AuthClient(username=key_file['service_id'], password=key_file['service_key'], **_CONFIG['auth'])
+token_renewer = TokenRenewer(auth_client, expiration=600)
+token_renewer.subscribe_to_token_change(client.prov_client.set_token)
+
+
 configs = client.configs()
 devices = client.devices()
 plugins = client.plugins()
@@ -72,7 +83,7 @@ parameters = client.parameters()
 
 # # test connectivity
 try:
-    client.test_connectivity()
+    plugins.installable()
 except Exception as e:
     print >> sys.stderr, 'Error while connecting to xivo-provd:', e
     sys.exit(1)
@@ -272,10 +283,6 @@ RAW_HELP_MAP = {
     Get the plugin object for plugin 'xivo-aastra-2.6.0.2010'
 
         plugins['xivo-aastra-2.6.0.2010']
-
-    Manage the plugin subsystem parameters
-
-        plugins.parameters()
 """,
     cli_client.Plugin: """\
 \x1b[1mDescription\x1b[0m
@@ -289,14 +296,10 @@ RAW_HELP_MAP = {
     Install all available plugin-packages
 
         plugins['xivo-aastra-2.6.0.2010'].install_all()
-
-    Manage this plugin subsystem parameters
-
-        plugins['xivo-aastra-2.6.0.2010'].parameters()
 """,
     cli_client.Parameters: """\
 \x1b[1mDescription\x1b[0m
-    Manage parameters of a certain underlying object.
+    Manage parameters of the provisioning server.
 
 \x1b[1mExamples\x1b[0m
     Get the parameters description
@@ -356,8 +359,7 @@ def dirr(obj):
     return list(name for name in dir(obj) if not name.startswith('_'))
 
 
-# import and initialize the helpers module
-import xivo_provd_cli.helpers as helpers
+# initialize the helpers module
 helpers._init_module(configs, devices, plugins)
 
 
@@ -377,6 +379,7 @@ def my_displayhook(value):
     if value is not None:
         __builtin__._ = value
         pprint(value)
+
 
 sys.displayhook = my_displayhook
 
@@ -407,7 +410,7 @@ class Completer(object):
     # This is largely taken from the rlcompleter module
     def __init__(self, namespace):
         if not isinstance(namespace, dict):
-            raise TypeError, 'namespace must be a dictionary'
+            raise TypeError('namespace must be a dictionary')
 
         self.namespace = namespace
 
@@ -459,12 +462,14 @@ class Completer(object):
                 matches.append(word)
         return matches
 
+
 def get_class_members(klass):
     ret = dirr(klass)
     if hasattr(klass, '__bases__'):
         for base in klass.__bases__:
             ret = ret + get_class_members(base)
     return ret
+
 
 completer = Completer(cli_globals)
 readline.set_completer(completer.complete)
@@ -491,11 +496,13 @@ class CustomInteractiveConsole(code.InteractiveConsole):
     def write(self, data):
         sys.stdout.write(data)
 
-if opts.command:
-    exec opts.command in cli_globals
-else:
-    cli = CustomInteractiveConsole(cli_globals)
-    cli.interact('')
+
+with token_renewer:
+    if opts.command:
+        exec opts.command in cli_globals
+    else:
+        cli = CustomInteractiveConsole(cli_globals)
+        cli.interact('')
 
 # save history file
 readline.set_history_length(DEFAULT_HISTFILESIZE)
