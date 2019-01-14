@@ -93,13 +93,6 @@ devices = client.devices()
 plugins = client.plugins()
 parameters = client.parameters()
 
-# # test connectivity
-try:
-    plugins.installable()
-except Exception as e:
-    print >> sys.stderr, 'Error while connecting to xivo-provd:', e
-    sys.exit(1)
-
 
 # create help
 RAW_HELP_MAP = {
@@ -510,11 +503,18 @@ class CustomInteractiveConsole(code.InteractiveConsole):
 
 
 with token_renewer:
+    # # test connectivity
+    try:
+        plugins.installable()
+    except Exception as e:
+        print >> sys.stderr, 'Error while connecting to xivo-provd:', e
+        sys.exit(1)
     if opts.command:
         exec opts.command in cli_globals
     else:
         cli = CustomInteractiveConsole(cli_globals)
         cli.interact('')
+
 
 # save history file
 readline.set_history_length(DEFAULT_HISTFILESIZE)
