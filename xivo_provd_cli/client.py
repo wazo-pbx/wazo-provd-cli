@@ -412,7 +412,7 @@ class Devices(object):
         self._dev_mgr.delete(id)
 
     def remove_all(self):
-        for device in self._dev_mgr.list({}):
+        for device in self._dev_mgr.list({})['devices']:
             device_id = device[u'id']
             print 'Removing device %s' % device_id
             self._dev_mgr.delete(device_id)
@@ -436,13 +436,13 @@ class Devices(object):
         return Device(name, self._dev_mgr)
 
     def count(self):
-        return len(self._dev_mgr.list(fields=[u'id']))
+        return len(self._dev_mgr.list(fields=[u'id'])['devices'])
 
     def using_plugin(self, plugin_id):
         return self._new_device_group_from_selector({u'plugin': plugin_id})
 
     def _new_device_group_from_selector(self, selector):
-        devices = self._dev_mgr.list(selector, fields=[u'id'])
+        devices = self._dev_mgr.list(selector, fields=[u'id'], recurse=True)['devices']
         device_ids = [device[u'id'] for device in devices]
         return DeviceGroup(self._dev_mgr, device_ids)
 
