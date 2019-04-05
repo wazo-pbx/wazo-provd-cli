@@ -442,7 +442,7 @@ class Devices(object):
         return self._new_device_group_from_selector({u'plugin': plugin_id})
 
     def _new_device_group_from_selector(self, selector):
-        devices = self._dev_mgr.list(selector, fields=[u'id'])['devices']
+        devices = self._dev_mgr.list(selector, fields=[u'id'], recurse=True)['devices']
         device_ids = [device[u'id'] for device in devices]
         return DeviceGroup(self._dev_mgr, device_ids)
 
