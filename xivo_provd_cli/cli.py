@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # Copyright 2011-2019 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
@@ -16,8 +15,8 @@ import sys
 import types
 import xivo_provd_cli.helpers as helpers
 from pprint import pprint
+from wazo_auth_client import Client as AuthClient
 from xivo.token_renewer import TokenRenewer
-from xivo_auth_client import Client as AuthClient
 from xivo_provd_cli import client as cli_client
 from xivo.config_helper import parse_config_file
 

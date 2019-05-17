@@ -9,8 +9,11 @@ X-Python-Version: >= 2.7
 Package: xivo-provd-cli
 Architecture: all
 Section: python
-Depends: ${python:Depends}, ${misc:Depends}, wazo-provd-client
-Conflicts: xivo-provd (<< 15.05)
+Depends:
+ ${python:Depends},
+ ${misc:Depends},
+ wazo-auth-client,
+ wazo-provd-client
 Description: CLI program to interact with xivo-provd
  Wazo is a system based on a powerful IPBX, to bring an easy to
  install solution for telephony and related services.
