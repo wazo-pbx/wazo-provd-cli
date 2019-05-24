@@ -35,7 +35,6 @@ _CONFIG = {
         'host': DEFAULT_HOST,
         'port': DEFAULT_PORT,
         'verify_certificate': '/usr/share/xivo-certs/server.crt',
-        'prefix': '/provd',
     }
 }
 
