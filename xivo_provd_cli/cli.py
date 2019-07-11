@@ -83,8 +83,9 @@ client = cli_client.new_cli_provisioning_client(_CONFIG['provd'])
 key_file = parse_config_file(_CONFIG['auth'].pop('key_file'))
 auth_client = AuthClient(username=key_file['service_id'], password=key_file['service_key'], **_CONFIG['auth'])
 token_renewer = TokenRenewer(auth_client, expiration=600)
-token_renewer.subscribe_to_token_change(client.prov_client.set_token)
-
+token_renewer.subscribe_to_token_change(
+    lambda token: client.prov_client.set_token(token["token"])
+)
 
 configs = client.configs()
 devices = client.devices()
