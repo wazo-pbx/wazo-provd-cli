@@ -1,3 +1,9 @@
+wazo-provd-cli (0.1~20190808) wazo-dev-stretch; urgency=medium
+
+  * Rename xivo-provd-cli to wazo-provd-cli
+
+ -- Wazo Maintainers <dev+pkg@wazo.community>  Thu, 08 Aug 2019 11:12:17 -0400
+
 xivo-provd-cli (0.1) xivo-dev; urgency=low
 
   * Initial release.
