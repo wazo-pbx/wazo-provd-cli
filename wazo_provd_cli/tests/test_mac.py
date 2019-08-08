@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2015 Avencall
+# Copyright 2015-2019 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 import unittest
 
-from xivo_provd_cli.mac import norm_mac
+from wazo_provd_cli.mac import norm_mac
 
 
 class TestNormMac(unittest.TestCase):

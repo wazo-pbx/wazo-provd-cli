@@ -13,11 +13,11 @@ import re
 import readline
 import sys
 import types
-import xivo_provd_cli.helpers as helpers
+import wazo_provd_cli.helpers as helpers
 from pprint import pprint
 from wazo_auth_client import Client as AuthClient
 from xivo.token_renewer import TokenRenewer
-from xivo_provd_cli import client as cli_client
+from wazo_provd_cli import client as cli_client
 from xivo.config_helper import parse_config_file
 
 DEFAULT_HOST = 'localhost'
@@ -368,7 +368,7 @@ helpers._init_module(configs, devices, plugins)
 
 # import and initialize the tests module
 if opts.tests:
-    import xivo_provd_cli.plugin as plugin_tests
+    import wazo_provd_cli.plugin as plugin_tests
     plugin_tests._init_module(configs, devices, plugins)
 
 
