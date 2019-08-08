@@ -215,7 +215,7 @@ class ProvisioningClient(object):
         try:
             self.plugins.list_installable()
         except Exception as e:
-            print >> sys.stderr, 'Error while connecting to xivo-provd:', e
+            print >> sys.stderr, 'Error while connecting to wazo-provd:', e
 
 
 def _rec_update_dict(base_dict, overlay_dict):

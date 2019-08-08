@@ -22,13 +22,13 @@ from xivo.config_helper import parse_config_file
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 8666
-DEFAULT_HISTFILE = os.path.expanduser('~/.xivo_provd_cli')
+DEFAULT_HISTFILE = os.path.expanduser('~/.wazo_provd_cli')
 DEFAULT_HISTFILESIZE = 500
 
 _CONFIG = {
     'auth': {
         'host': 'localhost',
-        'key_file': '/var/lib/wazo-auth-keys/xivo-provd-cli-key.yml',
+        'key_file': '/var/lib/wazo-auth-keys/wazo-provd-cli-key.yml',
         'verify_certificate': '/usr/share/xivo-certs/server.crt',
     },
     'provd': {
@@ -373,7 +373,7 @@ if opts.tests:
 
 
 # change interpreter prompt
-sys.ps1 = 'xivo-provd-cli> '
+sys.ps1 = 'wazo-provd-cli> '
 sys.ps2 = '....... '
 
 
@@ -505,7 +505,7 @@ with token_renewer:
     try:
         plugins.installable()
     except Exception as e:
-        print >> sys.stderr, 'Error while connecting to xivo-provd:', e
+        print >> sys.stderr, 'Error while connecting to wazo-provd:', e
         sys.exit(1)
     if opts.command:
         exec opts.command in cli_globals
