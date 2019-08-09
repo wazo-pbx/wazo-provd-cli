@@ -59,6 +59,11 @@ else:
     host = args[0]
 
 
+if sys.argv[0].endswith('xivo-provd-cli'):
+    print(
+        'Warning: xivo-provd-cli is a deprecated alias to wazo-provd-cli. Use wazo-provd-cli instead'
+    )
+
 def _bool(value):
     if value in ['True', 'true', '1']:
         return True
