@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2011-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2011-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 """A command-line interpreter that interact with provd servers."""
@@ -28,8 +28,10 @@ DEFAULT_HISTFILESIZE = 500
 _CONFIG = {
     'auth': {
         'host': 'localhost',
+        'port': 9497,
+        'prefix': None,
+        'https': False,
         'key_file': '/var/lib/wazo-auth-keys/wazo-provd-cli-key.yml',
-        'verify_certificate': '/usr/share/xivo-certs/server.crt',
     },
     'provd': {
         'host': DEFAULT_HOST,
@@ -63,6 +65,7 @@ if sys.argv[0].endswith('xivo-provd-cli'):
     print(
         'Warning: xivo-provd-cli is a deprecated alias to wazo-provd-cli. Use wazo-provd-cli instead'
     )
+
 
 def _bool(value):
     if value in ['True', 'true', '1']:
