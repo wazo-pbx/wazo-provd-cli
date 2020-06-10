@@ -20,8 +20,6 @@ from xivo.token_renewer import TokenRenewer
 from wazo_provd_cli import client as cli_client
 from xivo.config_helper import parse_config_file
 
-DEFAULT_HOST = 'localhost'
-DEFAULT_PORT = 8666
 DEFAULT_HISTFILE = os.path.expanduser('~/.wazo_provd_cli')
 DEFAULT_HISTFILESIZE = 500
 
@@ -34,9 +32,10 @@ _CONFIG = {
         'key_file': '/var/lib/wazo-auth-keys/wazo-provd-cli-key.yml',
     },
     'provd': {
-        'host': DEFAULT_HOST,
-        'port': DEFAULT_PORT,
-        'verify_certificate': '/usr/share/xivo-certs/server.crt',
+        'host': 'localhost',
+        'port': 8666,
+        'prefix': None,
+        'https': False,
     }
 }
 
@@ -44,6 +43,8 @@ _CONFIG = {
 parser = optparse.OptionParser(usage='usage: %prog [options] [hostname]')
 parser.add_option('--port',
                   help='port number of the REST API')
+parser.add_option('--prefix',
+                  help='prefix to use to connect to provd')
 parser.add_option('--https',
                   help='enable or disable HTTPS connection to provd')
 parser.add_option('--verify',
@@ -55,10 +56,6 @@ parser.add_option('--tests', action='store_true', default=False,
                   help='import the tests module')
 
 opts, args = parser.parse_args()
-if not args:
-    host = DEFAULT_HOST
-else:
-    host = args[0]
 
 
 if sys.argv[0].endswith('xivo-provd-cli'):
@@ -75,10 +72,12 @@ def _bool(value):
     return value
 
 
-_CONFIG['provd']['host'] = host
-
+if args:
+    _CONFIG['provd']['host'] = args[0]
 if opts.port is not None:
     _CONFIG['provd']['port'] = int(opts.port)
+if opts.prefix is not None:
+    _CONFIG['provd']['prefix'] = int(opts.prefix)
 if opts.https is not None:
     _CONFIG['provd']['https'] = _bool(opts.https)
 if opts.verify is not None:
