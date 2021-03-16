@@ -92,7 +92,7 @@ def missing_plugins():
     return sorted(set(used_plugins()) - set(installed_plugins()))
 
 
-def mass_update_devices_plugin(old_plugin, new_plugin, synchronize=False):
+def mass_update_devices_plugin(old_plugin, new_plugin, synchronize=False, recurse=False):
     """Update all devices using plugin old_plugin to plugin new_plugin, and
     optionally synchronize the affected devices.
 
@@ -108,7 +108,7 @@ def mass_update_devices_plugin(old_plugin, new_plugin, synchronize=False):
         if answer and answer not in ('Y', 'y'):
             return
 
-    for device in _devices.find({u'plugin': old_plugin}):
+    for device in _devices.find({u'plugin': old_plugin}, recurse=recurse):
         device[u'plugin'] = new_plugin
         print 'Updating device %s' % device[u'id']
         _devices.update(device)
