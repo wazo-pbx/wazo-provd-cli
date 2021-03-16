@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2011-2016 Avencall
+# Copyright 2011-2021 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ def installed_plugins():
 def unused_plugins():
     """Return the list of unused plugins, i.e. installed plugins that no
     devices are using.
-    
+
     """
     return sorted(set(installed_plugins()) - set(used_plugins()))
 
@@ -87,15 +87,15 @@ def unused_plugins():
 def missing_plugins():
     """Return the list of missing plugins, i.e. non-installed plugins that
     are used by at least one device.
-    
+
     """
     return sorted(set(used_plugins()) - set(installed_plugins()))
 
 
-def mass_update_devices_plugin(old_plugin, new_plugin, synchronize=False):
+def mass_update_devices_plugin(old_plugin, new_plugin, synchronize=False, recurse=False):
     """Update all devices using plugin old_plugin to plugin new_plugin, and
     optionally synchronize the affected devices.
-    
+
     """
     if not isinstance(old_plugin, basestring):
         raise ValueError(old_plugin)
@@ -108,7 +108,7 @@ def mass_update_devices_plugin(old_plugin, new_plugin, synchronize=False):
         if answer and answer not in ('Y', 'y'):
             return
 
-    for device in _devices.find({u'plugin': old_plugin}):
+    for device in _devices.find({u'plugin': old_plugin}, recurse=recurse):
         device[u'plugin'] = new_plugin
         print 'Updating device %s' % device[u'id']
         _devices.update(device)
@@ -134,9 +134,9 @@ def _is_plugin_installed(plugin, installed_plugins):
     return False
 
 
-def mass_synchronize():
+def mass_synchronize(recurse=False):
     """Synchronize all devices."""
-    for device in _devices.find(fields=[u'id']):
+    for device in _devices.find(fields=[u'id'], recurse=recurse):
         print 'Synchronizing device %s' % device[u'id']
         _devices.synchronize(device)
         print
