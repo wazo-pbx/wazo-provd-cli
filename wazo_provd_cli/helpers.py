@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# Copyright 2011-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2011-2022 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +18,7 @@
 
 # importing <module> as _<module> so that import are not autocompleted in the CLI
 import operator as _operator
-import sys as _sys
+import sys
 
 
 def _init_module(configs, devices, plugins):
@@ -40,32 +38,33 @@ def _itemgetter_default(item, default):
             return obj[item]
         except LookupError:
             return default
+
     return aux
 
 
 def system_info():
     """Print various system information."""
-    print 'Nb of devices: %s' % _devices.count()
-    print 'Nb of configs: %s' % _configs.count()
-    print 'Nb of installed plugins: %s' % _plugins.count_installed()
+    print('Nb of devices: %s' % _devices.count())
+    print('Nb of configs: %s' % _configs.count())
+    print('Nb of installed plugins: %s' % _plugins.count_installed())
 
 
 def detailed_system_info():
     """Print various system information."""
-    print 'Nb of devices: %s' % _devices.count()
-    for device in _devices.find(fields=[u'id']):
-        print '    %s' % device[u'id']
-    print 'Nb of configs: %s' % _configs.count()
-    for config in _configs.find(fields=[u'id']):
-        print '    %s' % config[u'id']
-    print 'Nb of installed plugins: %s' % _plugins.count_installed()
+    print('Nb of devices: %s' % _devices.count())
+    for device in _devices.find(fields=['id']):
+        print('    %s' % device['id'])
+    print('Nb of configs: %s' % _configs.count())
+    for config in _configs.find(fields=['id']):
+        print('    %s' % config['id'])
+    print('Nb of installed plugins: %s' % _plugins.count_installed())
     for plugin in _plugins.installed():
-        print '    %s' % plugin
+        print('    %s' % plugin)
 
 
 def used_plugins():
     """Return the list of plugins used by devices."""
-    s = set(map(_itemgetter_default(u'plugin', None), _devices.find(fields=[u'plugin'])))
+    s = set(map(_itemgetter_default('plugin', None), _devices.find(fields=['plugin'])))
     # None might be present if at least one device has no plugins
     s.discard(None)
     return sorted(s)
@@ -73,7 +72,7 @@ def used_plugins():
 
 def installed_plugins():
     """Return the list of all installed plugins."""
-    return sorted(_plugins.installed().iterkeys())
+    return sorted(_plugins.installed().keys())
 
 
 def unused_plugins():
@@ -92,30 +91,32 @@ def missing_plugins():
     return sorted(set(used_plugins()) - set(installed_plugins()))
 
 
-def mass_update_devices_plugin(old_plugin, new_plugin, synchronize=False, recurse=False):
+def mass_update_devices_plugin(
+    old_plugin, new_plugin, synchronize=False, recurse=False
+):
     """Update all devices using plugin old_plugin to plugin new_plugin, and
     optionally synchronize the affected devices.
 
     """
-    if not isinstance(old_plugin, basestring):
+    if not isinstance(old_plugin, str):
         raise ValueError(old_plugin)
-    if not isinstance(new_plugin, basestring):
+    if not isinstance(new_plugin, str):
         raise ValueError(new_plugin)
 
     installed_plugins = set(_plugins.installed())
     if not _are_plugins_installed([old_plugin, new_plugin], installed_plugins):
-        answer = raw_input('Do you want to proceed anyway? [Y/n] ')
+        answer = input('Do you want to proceed anyway? [Y/n] ')
         if answer and answer not in ('Y', 'y'):
             return
 
-    for device in _devices.find({u'plugin': old_plugin}, recurse=recurse):
-        device[u'plugin'] = new_plugin
-        print 'Updating device %s' % device[u'id']
+    for device in _devices.find({'plugin': old_plugin}, recurse=recurse):
+        device['plugin'] = new_plugin
+        print('Updating device %s' % device['id'])
         _devices.update(device)
         if synchronize:
-            print 'Synchronizing device %s' % device[u'id']
+            print('Synchronizing device %s' % device['id'])
             _devices.synchronize(device)
-        print
+        print()
 
 
 def _are_plugins_installed(plugins, installed_plugins):
@@ -130,24 +131,26 @@ def _is_plugin_installed(plugin, installed_plugins):
     if plugin in installed_plugins:
         return True
 
-    print >>_sys.stderr, 'Error: plugin %s is not installed' % plugin
+    print('Error: plugin %s is not installed' % plugin, file=sys.stderr)
     return False
 
 
 def mass_synchronize(recurse=False):
     """Synchronize all devices."""
-    for device in _devices.find(fields=[u'id'], recurse=recurse):
-        print 'Synchronizing device %s' % device[u'id']
+    for device in _devices.find(fields=['id'], recurse=recurse):
+        print('Synchronizing device %s' % device['id'])
         _devices.synchronize(device)
-        print
+        print()
 
 
 def remove_transient_configs():
     """Remove any unused transient config. Mostly useful for debugging purpose."""
     n = 0
-    for config in map(_operator.itemgetter(u'id'), _configs.find({u'transient': True}, fields=[u'id'])):
-        if not _devices.find({u'config': config}, fields=[u'id']):
-            print 'Removing config %s' % config
+    for config in map(
+        _operator.itemgetter('id'), _configs.find({'transient': True}, fields=['id'])
+    ):
+        if not _devices.find({'config': config}, fields=['id']):
+            print('Removing config %s' % config)
             _configs.remove(config)
             n += 1
-    print '%d unused transient configs have been removed' % n
+    print('%d unused transient configs have been removed' % n)

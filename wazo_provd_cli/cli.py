@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-# Copyright 2011-2020 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2011-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 """A command-line interpreter that interact with provd servers."""
 
 
-import __builtin__
+import builtins
 import code
-import optparse
+from argparse import ArgumentParser
 import os
 import re
 import readline
@@ -36,31 +35,31 @@ _CONFIG = {
         'port': 8666,
         'prefix': None,
         'https': False,
-    }
+    },
 }
 
 # parse command line arguments
-parser = optparse.OptionParser(usage='usage: %prog [options] [hostname]')
-parser.add_option('--port',
-                  help='port number of the REST API')
-parser.add_option('--prefix',
-                  help='prefix to use to connect to provd')
-parser.add_option('--https',
-                  help='enable or disable HTTPS connection to provd')
-parser.add_option('--verify',
-                  help='enable or disable verification of the certificate used by provd,'
-                  ' or path of the certificate to use for validation')
-parser.add_option('-c', '--command',
-                  help='specify the command to execute')
-parser.add_option('--tests', action='store_true', default=False,
-                  help='import the tests module')
+parser = ArgumentParser(usage='usage: %prog [options] [hostname]')
+parser.add_argument('--port', help='port number of the REST API')
+parser.add_argument('--prefix', help='prefix to use to connect to provd')
+parser.add_argument('--https', help='enable or disable HTTPS connection to provd')
+parser.add_argument(
+    '--verify',
+    help='enable or disable verification of the certificate used by provd,'
+    ' or path of the certificate to use for validation',
+)
+parser.add_argument('-c', '--command', help='specify the command to execute')
+parser.add_argument(
+    '--tests', action='store_true', default=False, help='import the tests module'
+)
 
-opts, args = parser.parse_args()
+opts, args = parser.parse_known_args()
 
 
 if sys.argv[0].endswith('xivo-provd-cli'):
     print(
-        'Warning: xivo-provd-cli is a deprecated alias to wazo-provd-cli. Use wazo-provd-cli instead'
+        'Warning: xivo-provd-cli is a deprecated alias to wazo-provd-cli. '
+        'Use wazo-provd-cli instead'
     )
 
 
@@ -88,7 +87,9 @@ client = cli_client.new_cli_provisioning_client(_CONFIG['provd'])
 
 # read key from key file and setup token renewer
 key_file = parse_config_file(_CONFIG['auth'].pop('key_file'))
-auth_client = AuthClient(username=key_file['service_id'], password=key_file['service_key'], **_CONFIG['auth'])
+auth_client = AuthClient(
+    username=key_file['service_id'], password=key_file['service_key'], **_CONFIG['auth']
+)
 token_renewer = TokenRenewer(auth_client, expiration=600)
 token_renewer.subscribe_to_token_change(client.prov_client.set_token)
 
@@ -327,18 +328,18 @@ RAW_HELP_MAP = {
     Unset the 'locale' parameter
 
         parameters.unset('locale')
-"""
+""",
 }
 
 
-class CLIHelp(object):
+class CLIHelp:
     def __init__(self, raw_help_map):
         self._help_map = self._build_help_map(raw_help_map)
 
     @staticmethod
     def _build_help_map(raw_help_map):
         res = {}
-        for raw_k, raw_v in raw_help_map.iteritems():
+        for raw_k, raw_v in raw_help_map.items():
             v = raw_v.rstrip()
             if isinstance(raw_k, types.MethodType):
                 res[raw_k.__func__] = v
@@ -349,13 +350,13 @@ class CLIHelp(object):
     def __call__(self, obj=None):
         help_map = self._help_map
         if obj in help_map:
-            print help_map[obj]
+            print(help_map[obj])
         elif type(obj) in help_map:
-            print help_map[type(obj)]
+            print(help_map[type(obj)])
         elif isinstance(obj, types.MethodType) and obj.__func__ in help_map:
-            print help_map[obj.__func__]
+            print(help_map[obj.__func__])
         else:
-            print 'No help for object "%s"' % obj
+            print('No help for object "%s"' % obj)
 
     def __repr__(self):
         return 'Type help() for help, or help(object) for help about object.'
@@ -376,6 +377,7 @@ helpers._init_module(configs, devices, plugins)
 # import and initialize the tests module
 if opts.tests:
     import wazo_provd_cli.plugin as plugin_tests
+
     plugin_tests._init_module(configs, devices, plugins)
 
 
@@ -387,7 +389,7 @@ sys.ps2 = '....... '
 # change display hook
 def my_displayhook(value):
     if value is not None:
-        __builtin__._ = value
+        builtins._ = value
         pprint(value)
 
 
@@ -400,15 +402,13 @@ cli_globals = {
     'devices': devices,
     'plugins': plugins,
     'parameters': parameters,
-
     'help': cli_help,
-    'python_help': __builtin__.help,
-
-    '__builtins__': __builtin__,
+    'python_help': builtins.help,
+    '__builtins__': builtins,
     'dirr': dirr,
     'helpers': helpers,
     'options': cli_client.OPTIONS,
-    'pprint': pprint
+    'pprint': pprint,
 }
 
 if opts.tests:
@@ -416,7 +416,7 @@ if opts.tests:
 
 
 # define completer for readline auto-completion
-class Completer(object):
+class Completer:
     # This is largely taken from the rlcompleter module
     def __init__(self, namespace):
         if not isinstance(namespace, dict):
@@ -442,7 +442,7 @@ class Completer(object):
 
     def global_matches(self, text):
         matches = []
-        for word, val in self.namespace.items():
+        for word, val in list(self.namespace.items()):
             if word.startswith(text) and word != "__builtins__":
                 matches.append(self._callable_postfix(val, word))
         return matches
@@ -502,7 +502,6 @@ except EnvironmentError:
 
 # create interpreter and interact with user
 class CustomInteractiveConsole(code.InteractiveConsole):
-
     def write(self, data):
         sys.stdout.write(data)
 
@@ -512,10 +511,10 @@ with token_renewer:
     try:
         plugins.installable()
     except Exception as e:
-        print >> sys.stderr, 'Error while connecting to wazo-provd:', e
+        print('Error while connecting to wazo-provd:', e, file=sys.stderr)
         sys.exit(1)
     if opts.command:
-        exec opts.command in cli_globals
+        exec(opts.command, cli_globals)
     else:
         cli = CustomInteractiveConsole(cli_globals)
         cli.interact('')
@@ -525,5 +524,5 @@ with token_renewer:
 readline.set_history_length(DEFAULT_HISTFILESIZE)
 try:
     readline.write_history_file(DEFAULT_HISTFILE)
-except EnvironmentError:
-    print 'warning: could not save history'
+except OSError:
+    print('warning: could not save history')

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (C) 2011-2015 Avencall
+# Copyright (C) 2011-2022 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +22,7 @@ from pprint import pprint as _pprint
 # list of (test config info, test config factory) tuples
 _TEST_CONFIGS = []
 # test certificate
-_TEST_CERT = u"""\
+_TEST_CERT = """\
 -----BEGIN CERTIFICATE-----
 MIICgjCCAiygAwIBAgIJAJwF1KTBOPBuMA0GCSqGSIb3DQEBBQUAMGExCzAJBgNV
 BAYTAkNBMQ8wDQYDVQQIEwZRdWViZWMxDzANBgNVBAcTBlF1ZWJlYzEhMB8GA1UE
@@ -43,7 +41,7 @@ hI3UQIC7ov7+c//RAE5gVACKtLNlIQ==
 -----END CERTIFICATE-----
 """
 # test key (goes with the test certificate by the way)
-_TEST_KEY = u"""\
+_TEST_KEY = """\
 -----BEGIN RSA PRIVATE KEY-----
 MIIBOwIBAAJBAMZWCiiv5lHL0fKkfxL2lbtdPKS8OMLjwq6s34SwKKaxnq132T9m
 IYcmLBpW60LW2N+Tn14GkJZGtBh2ieOdSWMCAwEAAQI/aiOhTCTWHO/2auOdHYjY
@@ -83,22 +81,22 @@ def remove_test_objects():
 def remove_test_configs():
     """Remove all test configs, i.e. all configs which have a key 'X_test'
     set to True.
-    
+
     """
-    for config in _configs.find({u'X_test': True}, fields=[u'id']):
-        config_id = config[u'id']
-        print 'Removing config %s' % config_id
+    for config in _configs.find({'X_test': True}, fields=['id']):
+        config_id = config['id']
+        print('Removing config %s' % config_id)
         _configs.remove(config_id)
 
 
 def remove_test_devices():
     """Remove all test devices, i.e. all devices which have a key 'X_test'
     set to True.
-    
+
     """
-    for device in _devices.find({u'X_test': True}, fields=[u'id']):
-        device_id = device[u'id']
-        print 'Removing device %s' % device_id
+    for device in _devices.find({'X_test': True}, fields=['id']):
+        device_id = device['id']
+        print('Removing device %s' % device_id)
         _devices.remove(device_id)
 
 
@@ -109,36 +107,29 @@ def exec_config_tests(device_id):
         desc = info['description']
         config = cfg_factory()
         while True:
-            s = raw_input('Test %s config ? [Y/n/p] ' % desc)
+            s = input('Test %s config ? [Y/n/p] ' % desc)
             if not s or s[0].lower() == 'y':
-                config[u'X_test'] = True
+                config['X_test'] = True
                 cfg_id = _configs.add(config)
-                device.set({u'config': cfg_id})
-                configured = device.get()[u'configured']
-                print '   configured: %s' % configured
+                device.set({'config': cfg_id})
+                configured = device.get()['configured']
+                print('   configured: %s' % configured)
                 break
             elif s[0].lower() == 'n':
                 break
             elif s[0].lower() == 'p':
                 _pprint(config)
             else:
-                print 'Invalid input %s' % input
-            print
+                print('Invalid input %s' % input)
+            print()
 
 
 def add_test_devices(plugin_id):
     """Add the tests device using plugin with the given ID."""
-    _devices.add({
-        u'id': u'empty',
-        u'X_test': True,
-        u'plugin': plugin_id
-    })
-    _devices.add({
-        u'id': u'min',
-        u'X_test': True,
-        u'mac': u'00:11:22:33:44:00',
-        u'plugin': plugin_id
-    })
+    _devices.add({'id': 'empty', 'X_test': True, 'plugin': plugin_id})
+    _devices.add(
+        {'id': 'min', 'X_test': True, 'mac': '00:11:22:33:44:00', 'plugin': plugin_id}
+    )
 
 
 def _test_config(fun):
@@ -149,802 +140,789 @@ def _test_config(fun):
 
 @_test_config
 def _minimalist():
-    return {
-        u'parent_ids': [],
-        u'raw_config': {}
-    }
+    return {'parent_ids': [], 'raw_config': {}}
 
 
 @_test_config
 def _minimalist_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
             }
-        }
+        },
     }
 
 
 @_test_config
 def _minimalist_global_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_proxy_ip': u'1.1.1.1',
-            u'sip_lines': {
-                u'1': {
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_proxy_ip': '1.1.1.1',
+            'sip_lines': {
+                '1': {
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _minimalist_mixed_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_proxy_ip': u'1.1.1.0',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_proxy_ip': '1.1.1.0',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _standard_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'registrar_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'auth_username': u'authusername1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1',
-                    u'number': u'number1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'registrar_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'auth_username': 'authusername1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
+                    'number': 'number1',
                 }
             }
-        }
+        },
     }
 
 
 @_test_config
 def _different_proxy_and_registrar_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'registrar_ip': u'1.1.1.2',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'registrar_ip': '1.1.1.2',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
             }
-        }
+        },
     }
 
 
 @_test_config
 def _backup_proxy_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'backup_proxy_ip': u'1.1.1.2',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'backup_proxy_ip': '1.1.1.2',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
             }
-        }
+        },
     }
 
 
 @_test_config
 def _backup_proxy_and_registrar_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'backup_proxy_ip': u'1.1.1.2',
-                    u'backup_registrar_ip': u'1.1.1.3',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'backup_proxy_ip': '1.1.1.2',
+                    'backup_registrar_ip': '1.1.1.3',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
             }
-        }
+        },
     }
 
 
 @_test_config
 def _non_standard_ports_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'proxy_port': 15060,
-                    u'registrar_port': 15061,
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'proxy_port': 15060,
+                    'registrar_port': 15061,
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
             }
-        }
+        },
     }
 
 
 @_test_config
 def _multiple_lines_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 },
-                u'2': {
-                    u'proxy_ip': u'1.1.2.1',
-                    u'username': u'username2',
-                    u'password': u'password2',
-                    u'display_name': u'User 2'
+                '2': {
+                    'proxy_ip': '1.1.2.1',
+                    'username': 'username2',
+                    'password': 'password2',
+                    'display_name': 'User 2',
                 },
-                u'3': {
-                    u'proxy_ip': u'1.1.3.1',
-                    u'username': u'username3',
-                    u'password': u'password3',
-                    u'display_name': u'User 3'
-                }
+                '3': {
+                    'proxy_ip': '1.1.3.1',
+                    'username': 'username3',
+                    'password': 'password3',
+                    'display_name': 'User 3',
+                },
             }
-        }
+        },
     }
 
 
 @_test_config
 def _tcp_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_transport': u'tcp',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_transport': 'tcp',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _tls_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_transport': u'tls',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_transport': 'tls',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _tls_with_certificate_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_transport': u'tls',
-            u'sip_servers_root_and_intermediate_certificates': _TEST_CERT,
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_transport': 'tls',
+            'sip_servers_root_and_intermediate_certificates': _TEST_CERT,
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _global_srtp_preferred_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_srtp_mode': u'preferred',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_srtp_mode': 'preferred',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _global_srtp_required_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_srtp_mode': u'required',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_srtp_mode': 'required',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _per_line_srtp_preferred_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1',
-                    u'srtp_mode': u'preferred'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
+                    'srtp_mode': 'preferred',
                 }
             }
-        }
+        },
     }
 
 
 @_test_config
 def _per_line_srtp_required_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1',
-                    u'srtp_mode': u'required'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
+                    'srtp_mode': 'required',
                 }
             }
-        }
+        },
     }
 
 
 @_test_config
 def _subscribe_mwi_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_subscribe_mwi': True,
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1',
-                    u'voicemail': u'*981'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_subscribe_mwi': True,
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
+                    'voicemail': '*981',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _global_dtmf_inband_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_dtmf_mode': u'RTP-in-band',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_dtmf_mode': 'RTP-in-band',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _global_dtmf_rfc2833_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_dtmf_mode': u'RTP-out-of-band',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_dtmf_mode': 'RTP-out-of-band',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _global_dtmf_sip_info_sip():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_dtmf_mode': u'SIP-INFO',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_dtmf_mode': 'SIP-INFO',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _dns_enabled():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'dns_enabled': True,
-            u'dns_ip': u'2.2.2.2',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'dns_enabled': True,
+            'dns_ip': '2.2.2.2',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _ntp_enabled():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'ntp_enabled': True,
-            u'ntp_ip': u'2.2.2.2',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'ntp_enabled': True,
+            'ntp_ip': '2.2.2.2',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _vlan_enabled():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'vlan_enabled': True,
-            u'vlan_id': u'100',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'vlan_enabled': True,
+            'vlan_id': '100',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _vlan_with_priority():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'vlan_enabled': True,
-            u'vlan_id': u'100',
-            u'vlan_priority': u'5',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'vlan_enabled': True,
+            'vlan_id': '100',
+            'vlan_priority': '5',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _vlan_with_pc_port():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'vlan_enabled': True,
-            u'vlan_id': u'100',
-            u'vlan_pc_port_id': u'200',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'vlan_enabled': True,
+            'vlan_id': '100',
+            'vlan_pc_port_id': '200',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _syslog_enabled():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'syslog_enabled': True,
-            u'syslog_ip': u'2.2.2.2',
-            u'syslog_port': 515,
-            u'syslog_level': u'info',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'syslog_enabled': True,
+            'syslog_ip': '2.2.2.2',
+            'syslog_port': 515,
+            'syslog_level': 'info',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _admin_username_and_password():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'admin_username': u'ausername',
-            u'admin_password': u'apassword',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'admin_username': 'ausername',
+            'admin_password': 'apassword',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _user_username_and_password():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'user_username': u'uusername',
-            u'user_password': u'upassword',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'user_username': 'uusername',
+            'user_password': 'upassword',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _timezone_paris():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'timezone': u'Europe/Paris',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'timezone': 'Europe/Paris',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _timezone_montreal():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'timezone': u'America/Montreal',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'timezone': 'America/Montreal',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _locale_fr_FR():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'locale': u'fr_FR',
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'locale': 'fr_FR',
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _config_encryption_enabled():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'config_encryption_enabled': True,
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'config_encryption_enabled': True,
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _funckey_speeddial():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
             },
-            u'funckeys': {
-                u'1': {
-                    u'type': u'speeddial',
-                    u'value': u'value1',
-                    u'label': u'label1',
+            'funckeys': {
+                '1': {
+                    'type': 'speeddial',
+                    'value': 'value1',
+                    'label': 'label1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _funckey_blf():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
             },
-            u'funckeys': {
-                u'1': {
-                    u'type': u'blf',
-                    u'value': u'value1',
-                    u'label': u'label1',
+            'funckeys': {
+                '1': {
+                    'type': 'blf',
+                    'value': 'value1',
+                    'label': 'label1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _funckey_park():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.1.1',
-                    u'username': u'username1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1'
+        'parent_ids': [],
+        'raw_config': {
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.1.1',
+                    'username': 'username1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
                 }
             },
-            u'funckeys': {
-                u'1': {
-                    u'type': u'park',
-                    u'value': u'value1',
-                    u'label': u'label1',
+            'funckeys': {
+                '1': {
+                    'type': 'park',
+                    'value': 'value1',
+                    'label': 'label1',
                 }
-            }
-        }
+            },
+        },
     }
 
 
 @_test_config
 def _full():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'dns_enabled': True,
-            u'dns_ip': u'1.1.1.1',
-            u'ntp_enabled': True,
-            u'ntp_ip': u'1.1.1.2',
-            u'vlan_enabled': True,
-            u'vlan_id': 1,
-            u'vlan_priority': 2,
-            u'vlan_pc_port_id': 3,
-            u'syslog_enabled': True,
-            u'syslog_ip': u'1.1.1.3',
-            u'syslog_port': 515,
-            u'syslog_level': u'warning',
-            u'admin_username': u'adminu',
-            u'admin_password': u'adminp',
-            u'user_username': u'useru',
-            u'user_password': u'userp',
-            u'timezone': u'Europe/Paris',
-            u'locale': u'fr_FR',
-            u'sip_proxy_ip': u'1.1.1.4',
-            u'sip_proxy_port': 5061,
-            u'sip_backup_proxy_ip': u'1.1.1.5',
-            u'sip_backup_proxy_port': 5062,
-            u'sip_registrar_ip': u'1.1.1.5',
-            u'sip_registrar_port': 5063,
-            u'sip_backup_registrar_ip': u'1.1.1.6',
-            u'sip_backup_registrar_port': 5063,
-            u'sip_outbound_proxy_ip': u'1.1.1.7',
-            u'sip_outbound_proxy_port': 5064,
-            u'sip_dtmf_mode': u'SIP-INFO',
-            u'sip_subscribe_mwi': True,
-            u'sip_lines': {
-                u'1': {
-                    u'proxy_ip': u'1.1.2.1',
-                    u'proxy_port': 5160,
-                    u'backup_proxy_ip': u'1.1.2.2',
-                    u'backup_proxy_port': 5161,
-                    u'registrar_ip': u'1.1.2.3',
-                    u'registrar_port': 5162,
-                    u'backup_registrar_ip': u'1.1.2.4',
-                    u'backup_registrar_port': 5163,
-                    u'outbound_proxy_ip': u'1.1.2.5',
-                    u'outbound_proxy_port': 5164,
-                    u'username': u'username1',
-                    u'auth_username': u'ausername1',
-                    u'password': u'password1',
-                    u'display_name': u'User 1',
-                    u'number': u'1',
-                    u'dtmf_mode': u'SIP-INFO',
-                    u'voicemail': u'*981'
+        'parent_ids': [],
+        'raw_config': {
+            'dns_enabled': True,
+            'dns_ip': '1.1.1.1',
+            'ntp_enabled': True,
+            'ntp_ip': '1.1.1.2',
+            'vlan_enabled': True,
+            'vlan_id': 1,
+            'vlan_priority': 2,
+            'vlan_pc_port_id': 3,
+            'syslog_enabled': True,
+            'syslog_ip': '1.1.1.3',
+            'syslog_port': 515,
+            'syslog_level': 'warning',
+            'admin_username': 'adminu',
+            'admin_password': 'adminp',
+            'user_username': 'useru',
+            'user_password': 'userp',
+            'timezone': 'Europe/Paris',
+            'locale': 'fr_FR',
+            'sip_proxy_ip': '1.1.1.4',
+            'sip_proxy_port': 5061,
+            'sip_backup_proxy_ip': '1.1.1.5',
+            'sip_backup_proxy_port': 5062,
+            'sip_registrar_ip': '1.1.1.5',
+            'sip_registrar_port': 5063,
+            'sip_backup_registrar_ip': '1.1.1.6',
+            'sip_backup_registrar_port': 5063,
+            'sip_outbound_proxy_ip': '1.1.1.7',
+            'sip_outbound_proxy_port': 5064,
+            'sip_dtmf_mode': 'SIP-INFO',
+            'sip_subscribe_mwi': True,
+            'sip_lines': {
+                '1': {
+                    'proxy_ip': '1.1.2.1',
+                    'proxy_port': 5160,
+                    'backup_proxy_ip': '1.1.2.2',
+                    'backup_proxy_port': 5161,
+                    'registrar_ip': '1.1.2.3',
+                    'registrar_port': 5162,
+                    'backup_registrar_ip': '1.1.2.4',
+                    'backup_registrar_port': 5163,
+                    'outbound_proxy_ip': '1.1.2.5',
+                    'outbound_proxy_port': 5164,
+                    'username': 'username1',
+                    'auth_username': 'ausername1',
+                    'password': 'password1',
+                    'display_name': 'User 1',
+                    'number': '1',
+                    'dtmf_mode': 'SIP-INFO',
+                    'voicemail': '*981',
                 },
-                u'2': {
-                    u'proxy_ip': u'1.1.3.1',
-                    u'proxy_port': 5260,
-                    u'backup_proxy_ip': u'1.1.3.2',
-                    u'backup_proxy_port': 5261,
-                    u'registrar_ip': u'1.1.3.3',
-                    u'registrar_port': 5262,
-                    u'backup_registrar_ip': u'1.1.3.4',
-                    u'backup_registrar_port': 5263,
-                    u'outbound_proxy_ip': u'1.1.3.5',
-                    u'outbound_proxy_port': 5264,
-                    u'username': u'username2',
-                    u'auth_username': u'ausername2',
-                    u'password': u'password2',
-                    u'display_name': u'User 2',
-                    u'number': u'2',
-                    u'dtmf_mode': u'SIP-INFO',
-                    u'voicemail': u'*982'
-                }
+                '2': {
+                    'proxy_ip': '1.1.3.1',
+                    'proxy_port': 5260,
+                    'backup_proxy_ip': '1.1.3.2',
+                    'backup_proxy_port': 5261,
+                    'registrar_ip': '1.1.3.3',
+                    'registrar_port': 5262,
+                    'backup_registrar_ip': '1.1.3.4',
+                    'backup_registrar_port': 5263,
+                    'outbound_proxy_ip': '1.1.3.5',
+                    'outbound_proxy_port': 5264,
+                    'username': 'username2',
+                    'auth_username': 'ausername2',
+                    'password': 'password2',
+                    'display_name': 'User 2',
+                    'number': '2',
+                    'dtmf_mode': 'SIP-INFO',
+                    'voicemail': '*982',
+                },
             },
-            u'exten_dnd': u'*dnd',
-            u'exten_fwd_unconditional': u'*fwdunc',
-            u'exten_fwd_no_answer': u'*fwdnoans',
-            u'exten_fwd_busy': u'*fwdbusy',
-            u'exten_fwd_disable_all': u'*fwddisable',
-            u'exten_park': u'*park',
-            u'exten_pickup_group': u'*pckgrp',
-            u'exten_pickup_call': u'*pckcall',
-            u'exten_voicemail': u'*vmail',
-            u'funckeys': {
-                u'1': {
-                    u'type': u'speeddial',
-                    u'value': u'fkv1',
-                    u'label': u'fkl1',
+            'exten_dnd': '*dnd',
+            'exten_fwd_unconditional': '*fwdunc',
+            'exten_fwd_no_answer': '*fwdnoans',
+            'exten_fwd_busy': '*fwdbusy',
+            'exten_fwd_disable_all': '*fwddisable',
+            'exten_park': '*park',
+            'exten_pickup_group': '*pckgrp',
+            'exten_pickup_call': '*pckcall',
+            'exten_voicemail': '*vmail',
+            'funckeys': {
+                '1': {
+                    'type': 'speeddial',
+                    'value': 'fkv1',
+                    'label': 'fkl1',
                 },
-                u'2': {
-                    u'type': u'blf',
-                    u'value': u'fkv2',
-                    u'label': u'fkl2',
+                '2': {
+                    'type': 'blf',
+                    'value': 'fkv2',
+                    'label': 'fkl2',
                 },
-                u'3': {
-                    u'type': u'park',
-                    u'value': u'fkv3',
-                    u'label': u'fkl3'
-                }
+                '3': {'type': 'park', 'value': 'fkv3', 'label': 'fkl3'},
             },
-            u'X_xivo_phonebook_ip': u'1.1.1.8'
-        }
+            'X_xivo_phonebook_ip': '1.1.1.8',
+        },
     }
 
 
 @_test_config
 def _minimalist_sccp():
     return {
-        u'parent_ids': [],
-        u'raw_config': {
-            u'sccp_call_managers': {
-                u'1': {
-                    u'ip': u'1.1.1.1'
-                }
-            }
-        }
+        'parent_ids': [],
+        'raw_config': {'sccp_call_managers': {'1': {'ip': '1.1.1.1'}}},
     }
