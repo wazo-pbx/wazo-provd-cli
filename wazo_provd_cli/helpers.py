@@ -44,22 +44,22 @@ def _itemgetter_default(item, default):
 
 def system_info():
     """Print various system information."""
-    print('Nb of devices: %s' % _devices.count())
-    print('Nb of configs: %s' % _configs.count())
-    print('Nb of installed plugins: %s' % _plugins.count_installed())
+    print(f'Nb of devices: {_devices.count()}')
+    print(f'Nb of configs: {_configs.count()}')
+    print(f'Nb of installed plugins: {_plugins.count_installed()}')
 
 
 def detailed_system_info():
     """Print various system information."""
-    print('Nb of devices: %s' % _devices.count())
+    print(f'Nb of devices: {_devices.count()}')
     for device in _devices.find(fields=['id']):
-        print('    %s' % device['id'])
-    print('Nb of configs: %s' % _configs.count())
+        print(f'    {device["id"]}')
+    print(f'Nb of configs: {_configs.count()}')
     for config in _configs.find(fields=['id']):
-        print('    %s' % config['id'])
-    print('Nb of installed plugins: %s' % _plugins.count_installed())
+        print(f'    {config["id"]}')
+    print(f'Nb of installed plugins: {_plugins.count_installed()}')
     for plugin in _plugins.installed():
-        print('    %s' % plugin)
+        print(f'    {plugin}')
 
 
 def used_plugins():
@@ -111,10 +111,10 @@ def mass_update_devices_plugin(
 
     for device in _devices.find({'plugin': old_plugin}, recurse=recurse):
         device['plugin'] = new_plugin
-        print('Updating device %s' % device['id'])
+        print(f'Updating device {device["id"]}')
         _devices.update(device)
         if synchronize:
-            print('Synchronizing device %s' % device['id'])
+            print(f'Synchronizing device {device["id"]}')
             _devices.synchronize(device)
         print()
 
@@ -131,14 +131,14 @@ def _is_plugin_installed(plugin, installed_plugins):
     if plugin in installed_plugins:
         return True
 
-    print('Error: plugin %s is not installed' % plugin, file=sys.stderr)
+    print(f'Error: plugin {plugin} is not installed', file=sys.stderr)
     return False
 
 
 def mass_synchronize(recurse=False):
     """Synchronize all devices."""
     for device in _devices.find(fields=['id'], recurse=recurse):
-        print('Synchronizing device %s' % device['id'])
+        print(f'Synchronizing device {device["id"]}')
         _devices.synchronize(device)
         print()
 
@@ -150,7 +150,7 @@ def remove_transient_configs():
         _operator.itemgetter('id'), _configs.find({'transient': True}, fields=['id'])
     ):
         if not _devices.find({'config': config}, fields=['id']):
-            print('Removing config %s' % config)
+            print(f'Removing config {config}')
             _configs.remove(config)
             n += 1
-    print('%d unused transient configs have been removed' % n)
+    print(f'{n:d} unused transient configs have been removed')

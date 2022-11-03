@@ -39,20 +39,20 @@ _FMT_STATE_MAP = {
 
 def _format_oip(oip):
     # format the oip
-    dict_ = {}
+    options = {}
     if oip.label:
-        dict_['label'] = "'%s'" % oip.label
+        options['label'] = f"'{oip.label}'"
     else:
-        dict_['label'] = 'operation'
-    dict_['state'] = _FMT_STATE_MAP[oip.state]
+        options['label'] = 'operation'
+    options['state'] = _FMT_STATE_MAP[oip.state]
     if oip.current is not None:
         if oip.end:
-            dict_['xy'] = '%s/%s' % (oip.current, oip.end)
+            options['xy'] = f'{oip.current}/{oip.end}'
         else:
-            dict_['xy'] = oip.current
+            options['xy'] = oip.current
     else:
-        dict_['xy'] = ''
-    return '%(label)s %(state)s %(xy)s' % dict_
+        options['xy'] = ''
+    return '{label} {state} {xy}'.format(**options)
 
 
 def _format_oip_line(oip, tree_pos, sw=4):
@@ -313,25 +313,25 @@ class Configs:
         return self._cfg_mgr.create(config)
 
     def get(self, id_or_config):
-        id = _get_id(id_or_config)
-        return self._cfg_mgr.get(id)
+        config_id = _get_id(id_or_config)
+        return self._cfg_mgr.get(config_id)
 
     def get_raw(self, id_or_config):
-        id = _get_id(id_or_config)
-        return self._cfg_mgr.get_raw(id)
+        config_id = _get_id(id_or_config)
+        return self._cfg_mgr.get_raw(config_id)
 
     def update(self, dotted_config):
         config = _expand_dotted_dict(dotted_config)
         self._cfg_mgr.update(config)
 
     def remove(self, id_or_config):
-        id = _get_id(id_or_config)
-        self._cfg_mgr.delete(id)
+        config_id = _get_id(id_or_config)
+        self._cfg_mgr.delete(config_id)
 
     def remove_all(self):
         for config in self._cfg_mgr.list({})['configs']:
             config_id = config['id']
-            print('Removing config %s' % config_id)
+            print(f'Removing config {config_id}')
             self._cfg_mgr.delete(config_id)
 
     def autocreate(self):
@@ -355,8 +355,8 @@ class Configs:
 
 
 class Config:
-    def __init__(self, id, cfg_mgr):
-        self._id = id
+    def __init__(self, config_id, cfg_mgr):
+        self._id = config_id
         self._cfg_mgr = cfg_mgr
 
     @property
@@ -413,29 +413,29 @@ class Devices:
     def get(self, id_or_device):
         # return a device as a dictionary
         # see __getitem__ to retrieve it as an object
-        id = _get_id(id_or_device)
-        return self._dev_mgr.get(id)
+        device_id = _get_id(id_or_device)
+        return self._dev_mgr.get(device_id)
 
     def update(self, device):
         self._dev_mgr.update(device)
 
     def remove(self, id_or_device):
-        id = _get_id(id_or_device)
-        self._dev_mgr.delete(id)
+        device_id = _get_id(id_or_device)
+        self._dev_mgr.delete(device_id)
 
     def remove_all(self):
         for device in self._dev_mgr.list({})['devices']:
             device_id = device['id']
-            print('Removing device %s' % device_id)
+            print(f'Removing device {device_id}')
             self._dev_mgr.delete(device_id)
 
     def reconfigure(self, id_or_device):
-        id = _get_id(id_or_device)
-        self._dev_mgr.reconfigure(id)
+        device_id = _get_id(id_or_device)
+        self._dev_mgr.reconfigure(device_id)
 
     def synchronize(self, id_or_device):
-        id = _get_id(id_or_device)
-        client_oip = self._dev_mgr.synchronize(id)
+        device_id = _get_id(id_or_device)
+        client_oip = self._dev_mgr.synchronize(device_id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
@@ -470,12 +470,12 @@ class DeviceGroup:
 
     def reconfigure(self):
         for device_id in self._device_ids:
-            print('Reconfiguring device %s' % device_id)
+            print(f'Reconfiguring device {device_id}')
             self._dev_mgr.reconfigure(device_id)
 
     def synchronize(self):
         for device_id in self._device_ids:
-            print('Synchronizing device %s' % device_id)
+            print(f'Synchronizing device {device_id}')
             client_oip = self._dev_mgr.synchronize(device_id)
             try:
                 _display_operation_in_progress(client_oip)
@@ -485,8 +485,8 @@ class DeviceGroup:
 
 class Device:
     # handy way to do simple modification to a device
-    def __init__(self, id, dev_mgr):
-        self._id = id
+    def __init__(self, device_id, dev_mgr):
+        self._id = device_id
         self._dev_mgr = dev_mgr
 
     @property
@@ -531,33 +531,33 @@ class Plugins:
     def __init__(self, pg_mgr):
         self._pg_mgr = pg_mgr
 
-    def install(self, id):
-        client_oip = self._pg_mgr.install(id)
+    def install(self, plugin_id):
+        client_oip = self._pg_mgr.install(plugin_id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
             client_oip.delete()
 
-    def upgrade(self, id):
-        client_oip = self._pg_mgr.upgrade(id)
+    def upgrade(self, plugin_id):
+        client_oip = self._pg_mgr.upgrade(plugin_id)
         _display_operation_in_progress(client_oip)
         client_oip.delete()
 
-    def uninstall(self, id):
-        self._pg_mgr.uninstall(id)
+    def uninstall(self, plugin_id):
+        self._pg_mgr.uninstall(plugin_id)
 
     def uninstall_all(self):
         pg_ids = sorted(self._pg_mgr.list_installed()['plugins'])
         for pg_id in pg_ids:
-            print('Uninstalling plugin %s' % pg_id)
+            print(f"Uninstalling plugin {pg_id}")
             self._pg_mgr.uninstall(pg_id)
 
-    def reload(self, id):
+    def reload(self, plugin_id):
         """Reload the plugin with the given ID. This is mostly useful for
         debugging purpose.
 
         """
-        self._pg_mgr.reload(id)
+        self._pg_mgr.reload(plugin_id)
 
     def update(self):
         client_oip = self._pg_mgr.update()
@@ -611,8 +611,8 @@ class Plugin:
         self._client_plugin = client_plugin
         self._plugin_id = plugin_id
 
-    def install(self, id):
-        client_oip = self._client_plugin.install_package(self._plugin_id, id)
+    def install(self, pkg_id):
+        client_oip = self._client_plugin.install_package(self._plugin_id, pkg_id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
@@ -624,7 +624,7 @@ class Plugin:
             self._client_plugin.get_packages_installable(self._plugin_id)['pkgs']
         )
         for pkg_id in pkg_ids:
-            print('Installing package %s' % pkg_id)
+            print(f'Installing package {pkg_id}')
             client_oip = self._client_plugin.install_package(self._plugin_id, pkg_id)
             try:
                 _display_operation_in_progress(client_oip)
@@ -632,22 +632,22 @@ class Plugin:
                 client_oip.delete()
             print()
 
-    def upgrade(self, id):
-        client_oip = self._client_plugin.upgrade_package(self._plugin_id, id)
+    def upgrade(self, pkg_id):
+        client_oip = self._client_plugin.upgrade_package(self._plugin_id, pkg_id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
             client_oip.delete()
 
-    def uninstall(self, id):
-        self._client_plugin.uninstall(id)
+    def uninstall(self, pkg_id):
+        self._client_plugin.uninstall(pkg_id)
 
     def uninstall_all(self):
         pkg_ids = sorted(
             self._client_plugin.get_packages_installed(self._plugin_id)['pkgs']
         )
         for pkg_id in pkg_ids:
-            print('Uninstalling package %s' % pkg_id)
+            print(f'Uninstalling package {pkg_id}')
             self._client_plugin.uninstall_package(self._plugin_id, pkg_id)
 
     def installed(self, search=None):

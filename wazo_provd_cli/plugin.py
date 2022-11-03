@@ -85,7 +85,7 @@ def remove_test_configs():
     """
     for config in _configs.find({'X_test': True}, fields=['id']):
         config_id = config['id']
-        print('Removing config %s' % config_id)
+        print(f'Removing config {config_id}')
         _configs.remove(config_id)
 
 
@@ -96,7 +96,7 @@ def remove_test_devices():
     """
     for device in _devices.find({'X_test': True}, fields=['id']):
         device_id = device['id']
-        print('Removing device %s' % device_id)
+        print(f'Removing device {device_id}')
         _devices.remove(device_id)
 
 
@@ -107,20 +107,20 @@ def exec_config_tests(device_id):
         desc = info['description']
         config = cfg_factory()
         while True:
-            s = input('Test %s config ? [Y/n/p] ' % desc)
+            s = input(f'Test {desc} config ? [Y/n/p] ')
             if not s or s[0].lower() == 'y':
                 config['X_test'] = True
                 cfg_id = _configs.add(config)
                 device.set({'config': cfg_id})
                 configured = device.get()['configured']
-                print('   configured: %s' % configured)
+                print(f'   configured: {configured}')
                 break
             elif s[0].lower() == 'n':
                 break
             elif s[0].lower() == 'p':
                 _pprint(config)
             else:
-                print('Invalid input %s' % input)
+                print(f'Invalid input {input}')
             print()
 
 

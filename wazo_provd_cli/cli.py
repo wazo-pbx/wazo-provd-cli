@@ -356,7 +356,7 @@ class CLIHelp:
         elif isinstance(obj, types.MethodType) and obj.__func__ in help_map:
             print(help_map[obj.__func__])
         else:
-            print('No help for object "%s"' % obj)
+            print(f'No help for object "{obj}"')
 
     def __repr__(self):
         return 'Type help() for help, or help(object) for help about object.'
@@ -468,7 +468,7 @@ class Completer:
         for word in words:
             if word.startswith(attr) and hasattr(thisobject, word):
                 val = getattr(thisobject, word)
-                word = self._callable_postfix(val, "%s.%s" % (expr, word))
+                word = self._callable_postfix(val, f"{expr}.{word}")
                 matches.append(word)
         return matches
 
