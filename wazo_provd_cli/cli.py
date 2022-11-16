@@ -39,7 +39,7 @@ _CONFIG = {
 }
 
 # parse command line arguments
-parser = ArgumentParser(usage='usage: %prog [options] [hostname]')
+parser = ArgumentParser(usage='usage: %%prog [options] [hostname]')
 parser.add_argument('--port', help='port number of the REST API')
 parser.add_argument('--prefix', help='prefix to use to connect to provd')
 parser.add_argument('--https', help='enable or disable HTTPS connection to provd')
