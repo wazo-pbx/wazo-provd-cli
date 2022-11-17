@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# Copyright (C) 2010-2015 Avencall
+# Copyright (C) 2010-2022 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +15,9 @@
 
 import re
 
-_MAC_ADDR = re.compile(ur'^[\da-fA-F]{1,2}([:-]?)(?:[\da-fA-F]{1,2}\1){4}[\da-fA-F]{1,2}$')
+_MAC_ADDR = re.compile(
+    r'^[\da-fA-F]{1,2}([:-]?)(?:[\da-fA-F]{1,2}\1){4}[\da-fA-F]{1,2}$'
+)
 
 
 def _to_mac(mac_string):
@@ -29,19 +29,19 @@ def _to_mac(mac_string):
         # no separator - length must be equal to 12 in this case
         if len(mac_string) != 12:
             raise ValueError('invalid MAC string')
-        return ''.join(chr(int(mac_string[i:i + 2], 16)) for i in xrange(0, 12, 2))
-    else:
-        tokens = mac_string.split(sep)
-        return ''.join(chr(int(token, 16)) for token in tokens)
+        return ''.join(chr(int(mac_string[i : i + 2], 16)) for i in range(0, 12, 2))
+
+    tokens = mac_string.split(sep)
+    return ''.join(chr(int(token, 16)) for token in tokens)
 
 
-def _from_mac(packed_mac, separator=u':', uppercase=False):
+def _from_mac(packed_mac, separator=':', uppercase=False):
     if len(packed_mac) != 6:
         raise ValueError('invalid packed MAC')
     if uppercase:
-        fmt = u'%02X'
+        fmt = '%02X'
     else:
-        fmt = u'%02x'
+        fmt = '%02x'
     return separator.join(fmt % ord(e) for e in packed_mac)
 
 

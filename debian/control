@@ -2,18 +2,18 @@ Source: wazo-provd-cli
 Section: python
 Priority: extra
 Maintainer: Wazo Maintainers <dev@wazo.community>
-Build-Depends: debhelper (>= 9), dh-python, python-all (>= 2.7), python-setuptools
+Build-Depends: debhelper (>= 9), dh-python, python3-all, python3-setuptools
 Standards-Version: 3.9.6
-X-Python-Version: >= 2.7
+X-Python3-Version: >= 3.7, << 3.8
 
 Package: wazo-provd-cli
 Architecture: all
 Section: python
 Depends:
- ${python:Depends},
+ ${python3:Depends},
  ${misc:Depends},
- wazo-auth-client,
- wazo-provd-client
+ wazo-auth-client-python3,
+ wazo-provd-client-python3
 Provides: xivo-provd-cli
 Conflicts: xivo-provd-cli
 Replaces: xivo-provd-cli

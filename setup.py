@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# Copyright 2015-2019 The Wazo Authors  (see the AUTHORS file)
+#!/usr/bin/env python3
+# Copyright 2015-2022 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,14 +20,10 @@ from setuptools import find_packages
 setup(
     name='wazo_provd_cli',
     version='0.1',
-
     description='a CLI to interact with wazo-provd',
-
     author='Wazo Authors',
     author_email='dev.wazo@gmail.com',
-
     url='http://wazo.community',
-
     packages=find_packages(),
     scripts=['bin/wazo-provd-cli'],
 )

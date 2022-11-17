@@ -1,19 +1,23 @@
-# -*- coding: utf-8 -*-
-
-# Copyright 2011-2019 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2011-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
+import sys
 from copy import deepcopy
 from time import sleep
 from sys import stdout
 from itertools import chain
-from wazo_provd_client.operation import OIP_SUCCESS, OIP_FAIL, OIP_WAITING, \
-    OIP_PROGRESS, BaseOperation
+from wazo_provd_client.operation import (
+    OIP_SUCCESS,
+    OIP_FAIL,
+    OIP_WAITING,
+    OIP_PROGRESS,
+    BaseOperation,
+)
 from wazo_provd_cli.mac import norm_mac
 from wazo_provd_client import Client as ProvdClient
 
 
-class _Options(object):
+class _Options:
     def __init__(self):
         self.search_description = True
         self.search_case_sensitive = False
@@ -29,26 +33,26 @@ _FMT_STATE_MAP = {
     OIP_WAITING: 'waiting...',
     OIP_PROGRESS: 'in progress...',
     OIP_FAIL: 'failed.',
-    OIP_SUCCESS: 'done.'
+    OIP_SUCCESS: 'done.',
 }
 
 
 def _format_oip(oip):
     # format the oip
-    dict_ = {}
+    options = {}
     if oip.label:
-        dict_['label'] = "'%s'" % oip.label
+        options['label'] = f"'{oip.label}'"
     else:
-        dict_['label'] = 'operation'
-    dict_['state'] = _FMT_STATE_MAP[oip.state]
+        options['label'] = 'operation'
+    options['state'] = _FMT_STATE_MAP[oip.state]
     if oip.current is not None:
         if oip.end:
-            dict_['xy'] = '%s/%s' % (oip.current, oip.end)
+            options['xy'] = f'{oip.current}/{oip.end}'
         else:
-            dict_['xy'] = oip.current
+            options['xy'] = oip.current
     else:
-        dict_['xy'] = ''
-    return '%(label)s %(state)s %(xy)s' % dict_
+        options['xy'] = ''
+    return '{label} {state} {xy}'.format(**options)
 
 
 def _format_oip_line(oip, tree_pos, sw=4):
@@ -71,6 +75,7 @@ def _build_write_table(oip):
             pos = cur_pos + (pos_suffix,)
             sub_table.extend(aux(oip, pos))
         return list(chain([(cur_pos, False)], sub_table, [(cur_pos, True)]))
+
     return aux(oip, ())
 
 
@@ -91,8 +96,8 @@ def _write_oip_info(top_oip, init_pos_spec, cur_pos_spec, fobj):
     init_idx = write_table.index(init_pos_spec)
     cur_idx = write_table.index(cur_pos_spec)
     # 3. write the lines...
-    pos_specs = set(write_table[init_idx:cur_idx + 1])
-    for idx in xrange(init_idx, cur_idx + 1):
+    pos_specs = set(write_table[init_idx : cur_idx + 1])
+    for idx in range(init_idx, cur_idx + 1):
         tree_pos, completed = write_table[idx]
         oip = _retrieve_oip(top_oip, tree_pos)
         if not completed and (tree_pos, True) in pos_specs:
@@ -121,6 +126,7 @@ def _find_active_oip(top_oip):
         else:
             # oip.state is either waiting or progress
             return (cur_tree_pos, False)
+
     return aux(top_oip, ())
 
 
@@ -137,7 +143,7 @@ def _display_operation_in_progress(client_oip):
         else:
             init_pos_spec = cur_pos_spec
             sleep(OPTIONS.oip_update_interval)
-    print
+    print()
 
 
 def _nodisplay_operation_in_progress(client_oip):
@@ -146,32 +152,39 @@ def _nodisplay_operation_in_progress(client_oip):
             break
         else:
             sleep(OPTIONS.oip_update_interval)
-    print _format_oip_line(client_oip, ())
+    print(_format_oip_line(client_oip, ()))
 
 
 def _search_in_pkgs_gen(pkgs, search):
     # define search package predicate
     if OPTIONS.search_description:
+
         def search_pkg_pred(pkg_idpkg_name, pkg):
             if search_pred(pkg_id):
                 return True
             else:
-                if u'description' in pkg:
-                    return search_pred(pkg[u'description'])
+                if 'description' in pkg:
+                    return search_pred(pkg['description'])
             return False
+
     else:
+
         def search_pkg_pred(pkg_id, pkg):
             return search_pred(pkg_id)
+
     # define search predicate
     if OPTIONS.search_case_sensitive:
+
         def search_pred(value):
             return search in value
+
     else:
         search = search.lower()
 
         def search_pred(value):
             return search in value.lower()
-    for pkg_id, pkg in pkgs.iteritems():
+
+    for pkg_id, pkg in pkgs.items():
         if search_pkg_pred(pkg_id, pkg):
             yield pkg_id, pkg
 
@@ -185,13 +198,12 @@ def _search_in_pkgs(pkgs, search):
 
 
 def _get_id(id_or_dict):
-    if isinstance(id_or_dict, basestring):
+    if isinstance(id_or_dict, str):
         return id_or_dict
-    else:
-        return id_or_dict[u'id']
+    return id_or_dict['id']
 
 
-class ProvisioningClient(object):
+class ProvisioningClient:
     def __init__(self, prov_client):
         self._prov_client = prov_client
 
@@ -215,12 +227,12 @@ class ProvisioningClient(object):
         try:
             self.plugins.list_installable()
         except Exception as e:
-            print >> sys.stderr, 'Error while connecting to wazo-provd:', e
+            print('Error while connecting to wazo-provd:', e, file=sys.stderr)
 
 
 def _rec_update_dict(base_dict, overlay_dict):
     # update a base dictionary from another dictionary
-    for k, v in overlay_dict.iteritems():
+    for k, v in overlay_dict.items():
         if isinstance(v, dict):
             old_v = base_dict.get(k)
             if isinstance(old_v, dict):
@@ -233,7 +245,7 @@ def _rec_update_dict(base_dict, overlay_dict):
 
 
 def _do_expand_dotted_dict(dotted_dict, result_dict):
-    for k, v in dotted_dict.iteritems():
+    for k, v in dotted_dict.items():
         k_head, sep, k_tail = k.partition('.')
         if sep:
             # dotted key
@@ -292,7 +304,7 @@ def _expand_dotted_dict(dotted_dict):
     return result
 
 
-class Configs(object):
+class Configs:
     def __init__(self, cfg_mgr):
         self._cfg_mgr = cfg_mgr
 
@@ -301,25 +313,25 @@ class Configs(object):
         return self._cfg_mgr.create(config)
 
     def get(self, id_or_config):
-        id = _get_id(id_or_config)
-        return self._cfg_mgr.get(id)
+        config_id = _get_id(id_or_config)
+        return self._cfg_mgr.get(config_id)
 
     def get_raw(self, id_or_config):
-        id = _get_id(id_or_config)
-        return self._cfg_mgr.get_raw(id)
+        config_id = _get_id(id_or_config)
+        return self._cfg_mgr.get_raw(config_id)
 
     def update(self, dotted_config):
         config = _expand_dotted_dict(dotted_config)
         self._cfg_mgr.update(config)
 
     def remove(self, id_or_config):
-        id = _get_id(id_or_config)
-        self._cfg_mgr.delete(id)
+        config_id = _get_id(id_or_config)
+        self._cfg_mgr.delete(config_id)
 
     def remove_all(self):
         for config in self._cfg_mgr.list({})['configs']:
-            config_id = config[u'id']
-            print 'Removing config %s' % config_id
+            config_id = config['id']
+            print(f'Removing config {config_id}')
             self._cfg_mgr.delete(config_id)
 
     def autocreate(self):
@@ -329,7 +341,7 @@ class Configs(object):
         old_id = _get_id(id_or_config)
         config = self._cfg_mgr.get(old_id)
         if new_id is not None:
-            config[u'id'] = new_id
+            config['id'] = new_id
         return self._cfg_mgr.create(config)
 
     def find(self, *args, **kwargs):
@@ -339,12 +351,12 @@ class Configs(object):
         return Config(name, self._cfg_mgr)
 
     def count(self):
-        return len(self._cfg_mgr.list(fields=[u'id'])['configs'])
+        return len(self._cfg_mgr.list(fields=['id'])['configs'])
 
 
-class Config(object):
-    def __init__(self, id, cfg_mgr):
-        self._id = id
+class Config:
+    def __init__(self, config_id, cfg_mgr):
+        self._id = config_id
         self._cfg_mgr = cfg_mgr
 
     @property
@@ -361,7 +373,7 @@ class Config(object):
         values = _expand_dotted_dict(dotted_values)
         old_config = self._cfg_mgr.get(self._id)
         new_config = deepcopy(old_config)
-        _rec_update_dict(new_config[u'raw_config'], values)
+        _rec_update_dict(new_config['raw_config'], values)
         if new_config != old_config:
             self._cfg_mgr.update(new_config)
         return self
@@ -371,7 +383,7 @@ class Config(object):
         new_config = deepcopy(old_config)
         for raw_value in raw_values:
             keys = raw_value.split('.')
-            cur_dict = new_config[u'raw_config']
+            cur_dict = new_config['raw_config']
             for key in keys[:-1]:
                 if key in cur_dict and isinstance(cur_dict[key], dict):
                     cur_dict = cur_dict[key]
@@ -387,11 +399,11 @@ class Config(object):
 
     def set_parents(self, *parents):
         config = self._cfg_mgr.get(self._id)
-        config[u'parent_ids'] = list(parents)
+        config['parent_ids'] = list(parents)
         self._cfg_mgr.update(config)
 
 
-class Devices(object):
+class Devices:
     def __init__(self, dev_mgr):
         self._dev_mgr = dev_mgr
 
@@ -401,29 +413,29 @@ class Devices(object):
     def get(self, id_or_device):
         # return a device as a dictionary
         # see __getitem__ to retrieve it as an object
-        id = _get_id(id_or_device)
-        return self._dev_mgr.get(id)
+        device_id = _get_id(id_or_device)
+        return self._dev_mgr.get(device_id)
 
     def update(self, device):
         self._dev_mgr.update(device)
 
     def remove(self, id_or_device):
-        id = _get_id(id_or_device)
-        self._dev_mgr.delete(id)
+        device_id = _get_id(id_or_device)
+        self._dev_mgr.delete(device_id)
 
     def remove_all(self):
         for device in self._dev_mgr.list({})['devices']:
-            device_id = device[u'id']
-            print 'Removing device %s' % device_id
+            device_id = device['id']
+            print(f'Removing device {device_id}')
             self._dev_mgr.delete(device_id)
 
     def reconfigure(self, id_or_device):
-        id = _get_id(id_or_device)
-        self._dev_mgr.reconfigure(id)
+        device_id = _get_id(id_or_device)
+        self._dev_mgr.reconfigure(device_id)
 
     def synchronize(self, id_or_device):
-        id = _get_id(id_or_device)
-        client_oip = self._dev_mgr.synchronize(id)
+        device_id = _get_id(id_or_device)
+        client_oip = self._dev_mgr.synchronize(device_id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
@@ -436,34 +448,34 @@ class Devices(object):
         return Device(name, self._dev_mgr)
 
     def count(self):
-        return len(self._dev_mgr.list(fields=[u'id'])['devices'])
+        return len(self._dev_mgr.list(fields=['id'])['devices'])
 
     def using_plugin(self, plugin_id):
-        return self._new_device_group_from_selector({u'plugin': plugin_id})
+        return self._new_device_group_from_selector({'plugin': plugin_id})
 
     def _new_device_group_from_selector(self, selector):
-        devices = self._dev_mgr.list(selector, fields=[u'id'], recurse=True)['devices']
-        device_ids = [device[u'id'] for device in devices]
+        devices = self._dev_mgr.list(selector, fields=['id'], recurse=True)['devices']
+        device_ids = [device['id'] for device in devices]
         return DeviceGroup(self._dev_mgr, device_ids)
 
     def using_mac(self, mac):
         normalized_mac = norm_mac(mac)
-        return self._new_device_group_from_selector({u'mac': normalized_mac})
+        return self._new_device_group_from_selector({'mac': normalized_mac})
 
 
-class DeviceGroup(object):
+class DeviceGroup:
     def __init__(self, dev_mgr, device_ids):
         self._dev_mgr = dev_mgr
         self._device_ids = device_ids
 
     def reconfigure(self):
         for device_id in self._device_ids:
-            print 'Reconfiguring device %s' % device_id
+            print(f'Reconfiguring device {device_id}')
             self._dev_mgr.reconfigure(device_id)
 
     def synchronize(self):
         for device_id in self._device_ids:
-            print 'Synchronizing device %s' % device_id
+            print(f'Synchronizing device {device_id}')
             client_oip = self._dev_mgr.synchronize(device_id)
             try:
                 _display_operation_in_progress(client_oip)
@@ -471,10 +483,10 @@ class DeviceGroup(object):
                 client_oip.delete()
 
 
-class Device(object):
+class Device:
     # handy way to do simple modification to a device
-    def __init__(self, id, dev_mgr):
-        self._id = id
+    def __init__(self, device_id, dev_mgr):
+        self._id = device_id
         self._dev_mgr = dev_mgr
 
     @property
@@ -487,7 +499,7 @@ class Device(object):
     def set(self, values):
         old_device = self._dev_mgr.get(self._id)
         new_device = deepcopy(old_device)
-        for k, v in values.iteritems():
+        for k, v in values.items():
             new_device[k] = v
         if new_device != old_device:
             self._dev_mgr.update(new_device)
@@ -515,37 +527,37 @@ class Device(object):
             client_oip.delete()
 
 
-class Plugins(object):
+class Plugins:
     def __init__(self, pg_mgr):
         self._pg_mgr = pg_mgr
 
-    def install(self, id):
-        client_oip = self._pg_mgr.install(id)
+    def install(self, plugin_id):
+        client_oip = self._pg_mgr.install(plugin_id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
             client_oip.delete()
 
-    def upgrade(self, id):
-        client_oip = self._pg_mgr.upgrade(id)
+    def upgrade(self, plugin_id):
+        client_oip = self._pg_mgr.upgrade(plugin_id)
         _display_operation_in_progress(client_oip)
         client_oip.delete()
 
-    def uninstall(self, id):
-        self._pg_mgr.uninstall(id)
+    def uninstall(self, plugin_id):
+        self._pg_mgr.uninstall(plugin_id)
 
     def uninstall_all(self):
         pg_ids = sorted(self._pg_mgr.list_installed()['plugins'])
         for pg_id in pg_ids:
-            print 'Uninstalling plugin %s' % pg_id
+            print(f"Uninstalling plugin {pg_id}")
             self._pg_mgr.uninstall(pg_id)
 
-    def reload(self, id):
+    def reload(self, plugin_id):
         """Reload the plugin with the given ID. This is mostly useful for
         debugging purpose.
 
         """
-        self._pg_mgr.reload(id)
+        self._pg_mgr.reload(plugin_id)
 
     def update(self):
         client_oip = self._pg_mgr.update()
@@ -576,7 +588,7 @@ class Plugins(object):
         return len(self._pg_mgr.list_installed()['pkgs'])
 
 
-class Parameters(object):
+class Parameters:
     def __init__(self, config_srv):
         self._config_srv = config_srv
 
@@ -594,13 +606,13 @@ class Parameters(object):
         self._config_srv.update(key, None)
 
 
-class Plugin(object):
+class Plugin:
     def __init__(self, client_plugin, plugin_id):
         self._client_plugin = client_plugin
         self._plugin_id = plugin_id
 
-    def install(self, id):
-        client_oip = self._client_plugin.install_package(self._plugin_id, id)
+    def install(self, pkg_id):
+        client_oip = self._client_plugin.install_package(self._plugin_id, pkg_id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
@@ -608,30 +620,34 @@ class Plugin(object):
 
     def install_all(self):
         """Install all the packages available from this plugin."""
-        pkg_ids = sorted(self._client_plugin.get_packages_installable(self._plugin_id)['pkgs'])
+        pkg_ids = sorted(
+            self._client_plugin.get_packages_installable(self._plugin_id)['pkgs']
+        )
         for pkg_id in pkg_ids:
-            print 'Installing package %s' % pkg_id
+            print(f'Installing package {pkg_id}')
             client_oip = self._client_plugin.install_package(self._plugin_id, pkg_id)
             try:
                 _display_operation_in_progress(client_oip)
             finally:
                 client_oip.delete()
-            print
+            print()
 
-    def upgrade(self, id):
-        client_oip = self._client_plugin.upgrade_package(self._plugin_id, id)
+    def upgrade(self, pkg_id):
+        client_oip = self._client_plugin.upgrade_package(self._plugin_id, pkg_id)
         try:
             _display_operation_in_progress(client_oip)
         finally:
             client_oip.delete()
 
-    def uninstall(self, id):
-        self._client_plugin.uninstall(id)
+    def uninstall(self, pkg_id):
+        self._client_plugin.uninstall(pkg_id)
 
     def uninstall_all(self):
-        pkg_ids = sorted(self._client_plugin.get_packages_installed(self._plugin_id)['pkgs'])
+        pkg_ids = sorted(
+            self._client_plugin.get_packages_installed(self._plugin_id)['pkgs']
+        )
         for pkg_id in pkg_ids:
-            print 'Uninstalling package %s' % pkg_id
+            print(f'Uninstalling package {pkg_id}')
             self._client_plugin.uninstall_package(self._plugin_id, pkg_id)
 
     def installed(self, search=None):
