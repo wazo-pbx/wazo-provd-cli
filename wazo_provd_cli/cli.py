@@ -1,4 +1,4 @@
-# Copyright 2011-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2011-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 """A command-line interpreter that interact with provd servers."""
@@ -491,7 +491,7 @@ readline.parse_and_bind('tab: complete')
 readline.clear_history()
 try:
     readline.read_history_file(DEFAULT_HISTFILE)
-except EnvironmentError:
+except OSError:
     # can't read or no such file
     try:
         # create new file rw only by user
