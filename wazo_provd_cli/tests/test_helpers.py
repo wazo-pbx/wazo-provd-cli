@@ -1,4 +1,4 @@
-# Copyright 2013-2022 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2013-2023 The Wazo Authors  (see the AUTHORS file)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ class TestHelpers(unittest.TestCase):
         self.assertFalse(res)
 
     def test_are_plugins_installed(self):
-        installed_plugins = set(['foo'])
+        installed_plugins = {'foo'}
 
         res = helpers._are_plugins_installed(['foo'], installed_plugins)
 
