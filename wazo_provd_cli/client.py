@@ -3,18 +3,20 @@
 
 import sys
 from copy import deepcopy
-from time import sleep
-from sys import stdout
 from itertools import chain
+from sys import stdout
+from time import sleep
+
+from wazo_provd_client import Client as ProvdClient
 from wazo_provd_client.operation import (
-    OIP_SUCCESS,
     OIP_FAIL,
-    OIP_WAITING,
     OIP_PROGRESS,
+    OIP_SUCCESS,
+    OIP_WAITING,
     BaseOperation,
 )
+
 from wazo_provd_cli.mac import norm_mac
-from wazo_provd_client import Client as ProvdClient
 
 
 class _Options:
