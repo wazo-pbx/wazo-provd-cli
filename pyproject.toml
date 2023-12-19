@@ -6,14 +6,14 @@ show-source = true
 max-line-length = 99
 application-import-names = "wazo_provd_cli"
 ignore = [
-  "E203", # whitespace before ':'
-  "W503", # line break before binary operator
+  "E203",  # whitespace before ':'
+  "W503",  # line break before binary operator
 ]
 exclude = [
-    ".tox",
-    ".eggs",
+  ".tox",
+  ".eggs",
 ]
 
 [tool.isort]
-py_version=39
 profile = "black"
+py_version = 39
