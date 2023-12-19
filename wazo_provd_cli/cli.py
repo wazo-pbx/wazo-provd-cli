@@ -6,18 +6,20 @@
 
 import builtins
 import code
-from argparse import ArgumentParser
 import os
 import re
 import readline
 import sys
 import types
-import wazo_provd_cli.helpers as helpers
+from argparse import ArgumentParser
 from pprint import pprint
+
 from wazo_auth_client import Client as AuthClient
-from xivo.token_renewer import TokenRenewer
-from wazo_provd_cli import client as cli_client
 from xivo.config_helper import parse_config_file
+from xivo.token_renewer import TokenRenewer
+
+import wazo_provd_cli.helpers as helpers
+from wazo_provd_cli import client as cli_client
 
 DEFAULT_HISTFILE = os.path.expanduser('~/.wazo_provd_cli')
 DEFAULT_HISTFILESIZE = 500
