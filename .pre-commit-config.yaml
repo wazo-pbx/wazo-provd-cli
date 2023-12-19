@@ -30,3 +30,7 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-toml
+  - repo: https://github.com/wazo-platform/wazo-git-hooks
+    rev: 1.1.1
+    hooks:
+      - id: wazo-copyright-check
